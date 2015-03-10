@@ -1,5 +1,5 @@
 import web
-from controllers import site, sample
+from controllers import site, sample, observation
 from sqlalchemy.orm import scoped_session, sessionmaker
 from model import *
 
@@ -26,7 +26,8 @@ class index:
 urls = (
     "", "index",
     "/site", site.app,
-    "/sample", sample.app
+    "/sample", sample.app,
+    "/observation", observation.app
 )
 app = web.application(urls, globals())
 app.add_processor(load_sqla)
