@@ -1,0 +1,20 @@
+$def with (samples)
+<html>
+<head>
+<title>Samples</title>
+<style type="text/css">
+    .listfield{
+        margin-left: 5px;
+    }
+</style>
+</head>
+<body>
+
+$for sample in samples:
+    <div class='site'>
+        <span class="listfield">$sample.date</span>
+        <span class="listfield">$sample.time</span>
+        <span class="listfield">$sample.site.name</span>
+    </div>
+</body>
+</html>
