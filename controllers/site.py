@@ -1,7 +1,7 @@
 import web
 from web import form
 from model import *
-from util import get_fields, map_column_type
+from _base import BaseController
 
 urls = (
     "/", "list",
@@ -17,26 +17,13 @@ class list:
         sites = web.ctx.orm.query(rvc_species.Site).all()
         return render.sites_list(sites)
 
-class new:
+class new(BaseController):
 
     def GET(self):
-        site_form = form.Form(*get_fields(rvc_species.Site,web.ctx))
-        f = site_form()
+        f = self.get_form(rvc_species.Site,web.ctx.orm)
         return render.form(f)
 
     def POST(self):
-        site_form = form.Form(*get_fields(rvc_species.Site,web.ctx))
-        f = site_form()
-        if not f.validates():
-            return render.form(f)
-        else:
-            site = rvc_species.Site()
-            site.name = f['name'].value
-            site.barangay = f['barangay'].value
-            site.municipality = f['municipality'].value
-            site.lat = f['lat'].value
-            site.lon = f['lon'].value
-            web.ctx.orm.add(site)
-            return web.seeother('/')
+        return self.store_values(rvc_species.Site,web.ctx.orm)
 
 app = web.application(urls, locals())

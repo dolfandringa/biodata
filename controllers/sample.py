@@ -1,7 +1,7 @@
 import web
 from web import form
 from model import *
-from util import get_fields, map_column_type
+from _base import BaseController
 
 urls = (
     "/", "list",
@@ -17,25 +17,13 @@ class list:
         samples = web.ctx.orm.query(rvc_species.Sample).all()
         return render.sample_list(samples)
 
-class new:
+class new(BaseController):
 
     def GET(self):
-        sample_form = form.Form(*get_fields(rvc_species.Sample,web.ctx))
-        f = sample_form()
+        f = self.get_form(rvc_species.Sample,web.ctx.orm)
         return render.form(f)
 
     def POST(self):
-        sample_form = form.Form(*get_fields(rvc_species.Sample,web.ctx))
-        f = sample_form()
-        if not f.validates():
-            return render.form(f)
-        else:
-            sample = rvc_species.Sample()
-            sample.date = f['date'].value
-            sample.time = f['time'].value
-            site = web.ctx.orm.query(rvc_species.Site).filter_by(id=f['site'].value).one()
-            sample.site = site
-            web.ctx.orm.add(sample)
-            return web.seeother('/')
+        return self.store_values(rvc_species.Sample,web.ctx.orm)
 
 app = web.application(urls, locals())

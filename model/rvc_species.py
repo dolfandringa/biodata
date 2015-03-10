@@ -5,13 +5,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 class Sample(BaseSample):
-    amount = Column(Integer)
-    total_score = Column(Integer)
-    score_0_9 = Column(Integer)
-    score_10_19 = Column(Integer)
-    score_20_29 = Column(Integer)
-    score_30_39 = Column(Integer)
-    score_40_49 = Column(Integer)
+    pass
 
 class Site(BaseSite):
     pass
@@ -22,6 +16,13 @@ class Observer(BaseObserver):
 class Observation(BaseObservation):
     species_id = Column(Integer, ForeignKey("species.id"))
     species = relationship("Species", backref="observations")
+    amount = Column(Integer)
+    total_score = Column(Integer)
+    score_0_9 = Column(Integer)
+    score_10_19 = Column(Integer)
+    score_20_29 = Column(Integer)
+    score_30_39 = Column(Integer)
+    score_40_49 = Column(Integer)
 
 class Species(Base):
     __tablename__ = "species"
