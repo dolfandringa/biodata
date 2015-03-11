@@ -3,6 +3,7 @@ import datetime
 from web import form
 from sqlalchemy import types as sa_types
 from sqlalchemy.orm.properties import RelationshipProperty, ColumnProperty
+from collections import OrderedDict
 
 def is_int_date(v):
     print('checking date value %s'%v)
@@ -35,10 +36,12 @@ __type_map = {
 }
 
 def map_column_type(c):
-   field =  __type_map.get(c.type.__class__)
-   args=field.get('args',[])
-   kwargs=field.get('kwargs',{})
-   return field['widget'](c.name,*args,**kwargs)
+    field =  __type_map.get(c.type.__class__)
+    args=field.get('args',[])
+    if not c.nullable:
+        args.append(form.notnull)
+    kwargs=field.get('kwargs',{})
+    return field['widget'](c.name,*args,**kwargs)
 
 
 def get_data_attributes(obj):
@@ -74,17 +77,23 @@ def get_relation_attributes(obj):
             yield attr
 
 def get_fields(obj,orm):
-    fields = []
+    fields = OrderedDict()
     for attr in get_relation_attributes(obj):
         #turn foreign keys into dropboxes with the id as value 
         #and the column "name" as description
         target = attr.property.mapper.entity
         values = orm.query(target).all()
         fname = attr.key
-        fields.append(form.Dropdown(
+        fields[fname]=form.Dropdown(
                         fname,
                         [(v.id, str(v)) for v in values],
-                        post="<a href='/%s/new'>Add %s</a>"%(fname,fname)))
+                        post="<a href='/%s/new'>Add %s</a>"%(fname,fname))
     for c in get_simple_columns(obj):
-        fields.append(map_column_type(c))
+        fields[c.name]=map_column_type(c)
+
+    if hasattr(obj,'formfields'):
+        for k,v in obj.formfields.items():
+            args=v.get('args',[])
+            kwargs=v.get('kwargs',{})
+            fields[k]=v['widget'](k,*args,**kwargs)
     return fields

@@ -7,7 +7,9 @@ render = web.template.render('templates/')
 class BaseController:
 
     def get_form(self,obj,orm):
-        return form.Form(*get_fields(obj,orm))()
+        f = form.Form(*get_fields(obj,orm).values())()
+        f.fill()
+        return f
 
     def store_values(self,obj,orm):
         f = self.get_form(obj,orm)

@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, Unicode, Table, Date, Time
 from sqlalchemy import ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
+from collections import OrderedDict
+from web import form
 
 Base = declarative_base()
 
@@ -13,10 +15,11 @@ sample_participants = Table("sample_participants",Base.metadata,
 
 class BaseSample(Base):
     __tablename__ = 'sample'
+    formfields = {}
     id = Column(Integer, primary_key=True)
-    date = Column(Date)
+    date = Column(Date, nullable=False)
     time = Column(Time)
-    site_id = Column(Integer, ForeignKey('site.id'))
+    site_id = Column(Integer, ForeignKey('site.id'), nullable=False)
     site = relationship("Site", backref="samples")
     participants = relationship("Observer",
                         secondary=sample_participants,
@@ -27,26 +30,31 @@ class BaseSample(Base):
 
 class BaseObserver(Base):
     __tablename__ = "observer"
+    formfields = {}
     id = Column(Integer, primary_key=True)
-    name = Column(Unicode)
+    name = Column(Unicode, nullable=False)
     def __str__(self):
         return "%s"%self.name
 
 
 class BaseObservation(Base):
     __tablename__ = "observation"
+    formfields = {}
     id = Column(Integer, primary_key=True)
     observer_id = Column(Integer, ForeignKey("observer.id"))
     sample_id = Column(Integer, ForeignKey("sample.id"))
     sample = relationship("Sample", backref="observations")
+    formfields['sample']={  'widget':form.Hidden,
+                            'valuefunc':lambda x: x.sample.id,
+                            'args':[],
+                            'kwargs':{}}
     observer = relationship("Observer", backref="observations")
     def __str__(self):
         return "Observation %i on %s at %s"%(self.id,self.sample.date,self.sample.site)
 
-
-
 class BaseSite(Base):
     __tablename__ = "site"
+    formfields = {}
     id = Column(Integer, primary_key=True)
     name = Column(Unicode)
     barangay = Column(Unicode)
@@ -54,4 +62,4 @@ class BaseSite(Base):
     lat = Column(String)
     lon = Column(String)
     def __str__(self):
-        return "%s, %s, %s"%(self.municipality,self.barangay,self.name)
+        return "%s, %s, %s"%(self.municipality or '',self.barangay or '',self.name)

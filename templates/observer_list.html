@@ -1,0 +1,26 @@
+$def with (observers)
+<html>
+<head>
+<title>Observers</title>
+<style type="text/css">
+    .datafield, .headerfield{
+      margin-left: 10px;
+      min-width: 300px;
+      display: inline-block;
+    }
+    .headerfield{
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+</style>
+</head>
+<body>
+  <div class="headerrow">
+    <span class='headerfield'>Name</span>
+  </div>
+  $for obs in observers:
+    <div class='datarow'>
+        <span class="datafield">$obs.name</span>
+    </div>
+</body>
+</html>
