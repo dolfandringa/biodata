@@ -67,8 +67,6 @@ def get_simple_columns(obj):
 def get_relation_attributes(obj):
     for attr in get_data_attributes(obj):
         if isinstance(attr.property,RelationshipProperty):
-            #turn foreign keys into dropboxes with the id as value 
-            #and the column "name" as description
             if attr.property.uselist == True:
                 #skip the property if it is on the Many side of One-to-Many
                 #or Many-to-Many relationships
@@ -77,14 +75,16 @@ def get_relation_attributes(obj):
 
 def get_fields(obj,orm):
     fields = []
-    for c in get_simple_columns(obj):
-        fields.append(map_column_type(c))
     for attr in get_relation_attributes(obj):
+        #turn foreign keys into dropboxes with the id as value 
+        #and the column "name" as description
         target = attr.property.mapper.entity
         values = orm.query(target).all()
         fname = attr.key
         fields.append(form.Dropdown(
                         fname,
-                        [(v.id, v.name) for v in values],
+                        [(v.id, str(v)) for v in values],
                         post="<a href='/%s/new'>Add %s</a>"%(fname,fname)))
+    for c in get_simple_columns(obj):
+        fields.append(map_column_type(c))
     return fields

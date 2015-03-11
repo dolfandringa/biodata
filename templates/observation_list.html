@@ -1,0 +1,34 @@
+$def with (observations)
+<html>
+<head>
+<title>Observations</title>
+<style type="text/css">
+    .datafield, .headerfield{
+      margin-left: 10px;
+      min-width: 100px;
+      display: inline-block;
+    }
+    .headerfield{
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+</style>
+</head>
+<body>
+  <div class="headerrow">
+    <span class='headerfield'>Date</span>
+    <span class='headerfield'>Time</span>
+    <span class='headerfield'>Site</span>
+    <span class='headerfield'>Observer</span>
+    <span class='headerfield'>Species</span>
+  </div>
+  $for observation in observations:
+    <div class='datarow'>
+        <span class="datafield">$observation.sample.date</span>
+        <span class="datafield">$observation.sample.time</span>
+        <span class="datafield">$observation.sample.site.name</span>
+        <span class="datafield">$observation.observer.name</span>
+        <span class="datafield">$observation.species.common_name</span>
+    </div>
+</body>
+</html>

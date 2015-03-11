@@ -21,12 +21,16 @@ class BaseSample(Base):
     participants = relationship("Observer",
                         secondary=sample_participants,
                         backref="samples")
+    def __str__(self):
+        return "Sample %s on %s %s at %s"%(self.id,self.date,self.time or '',self.site.name)
 
 
 class BaseObserver(Base):
     __tablename__ = "observer"
     id = Column(Integer, primary_key=True)
     name = Column(Unicode)
+    def __str__(self):
+        return "%s"%self.name
 
 
 class BaseObservation(Base):
@@ -36,6 +40,8 @@ class BaseObservation(Base):
     sample_id = Column(Integer, ForeignKey("sample.id"))
     sample = relationship("Sample", backref="observations")
     observer = relationship("Observer", backref="observations")
+    def __str__(self):
+        return "Observation %i on %s at %s"%(self.id,self.sample.date,self.sample.site)
 
 
 
@@ -47,3 +53,5 @@ class BaseSite(Base):
     municipality = Column(Unicode)
     lat = Column(String)
     lon = Column(String)
+    def __str__(self):
+        return "%s, %s, %s"%(self.municipality,self.barangay,self.name)

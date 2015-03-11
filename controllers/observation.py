@@ -14,8 +14,8 @@ render = web.template.render('templates/')
 
 class list:
     def GET(self):
-        samples = web.ctx.orm.query(rvc_species.Observation).all()
-        return render.sample_list(samples)
+        observations = web.ctx.orm.query(rvc_species.Observation).all()
+        return render.observation_list(observations)
 
 class new(BaseController):
 

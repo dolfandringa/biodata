@@ -29,5 +29,7 @@ class Species(Base):
     id = Column(Integer, primary_key=True)
     common_name = Column(Unicode)
     scientific_name = Column(Unicode)
+    def __str__(self):
+        return self.common_name
 
 __tables__ = (Sample, Observer, Observation, Species, Site)
