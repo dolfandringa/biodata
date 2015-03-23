@@ -19,12 +19,14 @@ def load_sqla(handler):
         # the following line:
         #web.ctx.orm.expunge_all()
 
+render = web.template.render('templates/')
+
 class index:
     def GET(self):
-        return 'Hello world!'
+        return render.index()
 
 urls = (
-    "", "index",
+    "/",index,
     "/site", site.app,
     "/sample", sample.app,
     "/observation", observation.app,

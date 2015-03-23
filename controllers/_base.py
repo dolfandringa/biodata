@@ -7,15 +7,23 @@ render = web.template.render('templates/')
 class BaseController:
 
     def get_form(self,obj,orm):
-        f = form.Form(*get_fields(obj,orm).values())()
-        f.fill()
+        fields=get_fields(obj,orm).values()
+        redirf=form.Hidden(name='redirect',value='list')
+        fields.append(redirf)
+        f = form.Form(*fields)()
+        defaults=dict([(i.name,i.value) for i in f.inputs])
+        source=web.input()
+        defaults.update(source)
+        f.fill(source=defaults)
         return f
 
     def store_values(self,obj,orm):
         f = self.get_form(obj,orm)
         if not f.validates():
             print('not validated')
-            return render.form(f)
+            ID = self.__class__.ID
+            TITLE = self.__class__.TITLE
+            return render.form(f,ID,TITLE)
         else:
             print('we validated')
             inst = obj()
@@ -30,4 +38,9 @@ class BaseController:
                 print('value: %s'%val)
                 setattr(inst,attr.key,val)
             orm.add(inst)
-            return web.seeother('/')
+            if f['redirect'].value == 'form':
+                #redirect to the form again, empty values the form first
+                f.fill(source=dict([(k.name,None) for k in f.inputs]))
+                return render.form(f,self.__class__.ID,self.__class__.TITLE)
+            else:
+                return web.seeother('/')

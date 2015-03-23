@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Unicode, Table, Date, Time
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, UnicodeText
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from collections import OrderedDict
@@ -41,6 +41,7 @@ class BaseObservation(Base):
     __tablename__ = "observation"
     formfields = {}
     id = Column(Integer, primary_key=True)
+    comments = Column(UnicodeText)
     observer_id = Column(Integer, ForeignKey("observer.id"))
     sample_id = Column(Integer, ForeignKey("sample.id"))
     sample = relationship("Sample", backref="observations")
@@ -56,10 +57,10 @@ class BaseSite(Base):
     __tablename__ = "site"
     formfields = {}
     id = Column(Integer, primary_key=True)
-    name = Column(Unicode)
+    name = Column(Unicode,nullable=False)
     barangay = Column(Unicode)
     municipality = Column(Unicode)
     lat = Column(String)
     lon = Column(String)
     def __str__(self):
-        return "%s, %s, %s"%(self.municipality or '',self.barangay or '',self.name)
+        return "%s, %s, %s"%(self.name, self.barangay or '', self.municipality or '')

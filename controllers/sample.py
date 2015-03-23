@@ -18,10 +18,12 @@ class list:
         return render.sample_list(samples)
 
 class new(BaseController):
+    ID = "sample"
+    TITLE = "New Sample"
 
     def GET(self):
         f = self.get_form(rvc_species.Sample,web.ctx.orm)
-        return render.form(f)
+        return render.form(f,new.ID,new.TITLE)
 
     def POST(self):
         return self.store_values(rvc_species.Sample,web.ctx.orm)

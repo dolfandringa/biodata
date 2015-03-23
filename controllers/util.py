@@ -26,11 +26,12 @@ __type_map = {
     },
     sa_types.Unicode: {'widget':form.Textbox},
     sa_types.String: {'widget':form.Textbox},
+    sa_types.UnicodeText: {'widget':form.Textarea},
     sa_types.Date: {
         'widget':form.Textbox,
-        'kwargs':{'post':"format: YYYY-MM-DD"},
+        'kwargs':{'post':" format: YYYY-MM-DD"},
         'args':[form.Validator(
-            'Must be a date with format YYYY-MM-DD',
+            'Not a valid date format.',
             is_int_date)]},
     sa_types.Time: {'widget':form.Textbox}
 }

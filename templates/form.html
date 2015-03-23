@@ -1,7 +1,23 @@
-$def with (form)
-
-<form name="main" method="post"> 
+$def with (form,id,title)
+<html>
+<head>
+<title>$:title</title>
+<script src="/static/scripts/jquery-1.11.2.min.js"></script>
+<link href="/static/css/select2.min.css" rel="stylesheet" />
+<link href="/static/css/styles.css" rel="stylesheet" />
+<script src="/static/scripts/select2.min.js"></script>
+</head>
+<body>
+<form name="form_$:id" method="post"> 
 $if not form.valid: <p class="error">An error occured. Please try again.</p>
 $:form.render()
-<input type="submit" />
 </form>
+<button onclick="jQuery('form[name=form_$:id]').submit()">Save</button>
+<button onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_$:id]').submit();">Save and New</button>
+<script type='text/javascript'>
+  jQuery(document).ready(function(){
+    jQuery("select").select2();
+  });
+</script>
+</body>
+</html>

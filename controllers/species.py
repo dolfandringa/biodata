@@ -18,10 +18,11 @@ class list:
         return render.species_list(species)
 
 class new(BaseController):
-
+    ID = 'species'
+    TITLE = 'New Species'
     def GET(self):
         f = self.get_form(rvc_species.Species,web.ctx.orm)
-        return render.form(f)
+        return render.form(f,new.ID,new.TITLE)
 
     def POST(self):
         return self.store_values(rvc_species.Species,web.ctx.orm)
