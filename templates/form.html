@@ -1,4 +1,4 @@
-$def with (form,id,title)
+$def with (form,id,title,action)
 <html>
 <head>
 <title>$:title</title>
@@ -6,9 +6,10 @@ $def with (form,id,title)
 <link href="/static/css/select2.min.css" rel="stylesheet" />
 <link href="/static/css/styles.css" rel="stylesheet" />
 <script src="/static/scripts/select2.min.js"></script>
+<script src="/static/scripts/jquery.form.js"></script>
 </head>
 <body>
-<form name="form_$:id" method="post"> 
+<form name="form_$:id" method="post" action="$:action"> 
 $if not form.valid: <p class="error">An error occured. Please try again.</p>
 $:form.render()
 </form>

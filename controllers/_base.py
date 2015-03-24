@@ -6,6 +6,13 @@ render = web.template.render('templates/')
 
 class BaseController:
 
+    def GET(self):
+        f = self.get_form(self.__class__.ORM_CLS,web.ctx.orm)
+        return render.form(f, self.__class__.ID, self.__class__.TITLE, web.url())
+
+    def POST(self):
+        return self.store_values(self.__class__.ORM_CLS,web.ctx.orm)
+
     def get_form(self,obj,orm):
         fields=get_fields(obj,orm).values()
         redirf=form.Hidden(name='redirect',value='list')
@@ -23,7 +30,7 @@ class BaseController:
             print('not validated')
             ID = self.__class__.ID
             TITLE = self.__class__.TITLE
-            return render.form(f,ID,TITLE)
+            return render.form(f,ID,TITLE,web.url())
         else:
             print('we validated')
             inst = obj()
@@ -41,6 +48,6 @@ class BaseController:
             if f['redirect'].value == 'form':
                 #redirect to the form again, empty values the form first
                 f.fill(source=dict([(k.name,None) for k in f.inputs]))
-                return render.form(f,self.__class__.ID,self.__class__.TITLE)
+                return render.form(f,self.__class__.ID,self.__class__.TITLE, web.url())
             else:
                 return web.seeother('/')

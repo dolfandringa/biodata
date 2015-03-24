@@ -20,13 +20,6 @@ class list:
 class new(BaseController):
     ID = "observer"
     TITLE = "New Observer"
-
-    def GET(self):
-        f = self.get_form(rvc_species.Observer,web.ctx.orm)
-        return render.form(f,new.ID,new.TITLE)
-
-    def POST(self):
-        res = self.store_values(rvc_species.Observer,web.ctx.orm)
-        return res
+    ORM_CLS = rvc_species.Observer
 
 app = web.application(urls, locals())

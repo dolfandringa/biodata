@@ -20,12 +20,6 @@ class list:
 class new(BaseController):
     ID = "site"
     TITLE = "New Site"
-
-    def GET(self):
-        f = self.get_form(rvc_species.Site,web.ctx.orm)
-        return render.form(f,new.ID,new.TITLE)
-
-    def POST(self):
-        return self.store_values(rvc_species.Site,web.ctx.orm)
+    ORM_CLS = rvc_species.Site
 
 app = web.application(urls, locals())
