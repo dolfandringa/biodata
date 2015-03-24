@@ -1,0 +1,17 @@
+$def with (classname,id,fields)
+<html>
+<head>
+<title>$:classname $:id</title>
+<script src="/static/scripts/jquery-1.11.2.min.js"></script>
+<link href="/static/css/select2.min.css" rel="stylesheet" />
+<link href="/static/css/styles.css" rel="stylesheet" />
+<script src="/static/scripts/select2.min.js"></script>
+<script src="/static/scripts/jquery.form.js"></script>
+</head>
+<body id="$:classname$:id" class="show_$:classname">
+$for k,v in fields.items():
+  <div class='datarow'>
+    <span class='headerfield'>$:k</span><span class='datafield'>$:v</span>
+  </div>
+</body>
+</html>

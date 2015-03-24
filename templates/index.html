@@ -9,6 +9,20 @@
 jQuery(document).ready(function(){
   jQuery.get("/sample/new",function(data){
     jQuery("#form1").html(data);
+    jQuery('#form1 input[name=redirect]').val('ajax')
+    jQuery("#form1 form").ajaxForm({
+      success:function(data,textStatus){
+        console.log(data);
+        console.log(textStatus);
+        console.log('success');
+        jQuery("#form1").html(data);
+        },
+      error:function(data,textStatus){
+        console.log(data);
+        console.log(textStatus);
+        console.log('error');
+      }
+    });
   });
 });
 </script>

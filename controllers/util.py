@@ -52,6 +52,11 @@ def get_data_attributes(obj):
             continue
         yield attr
 
+def get_values(inst):
+    columns = [c.name for c in get_simple_columns(inst.__class__)]
+    rel_columns = [c.key for c in get_relation_attributes(inst.__class__)]
+    return dict([(c,str(getattr(inst,c))) for c in columns+rel_columns])
+
 
 def get_simple_columns(obj):
     fields = []

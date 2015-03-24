@@ -13,8 +13,8 @@ $def with (form,id,title,action)
 $if not form.valid: <p class="error">An error occured. Please try again.</p>
 $:form.render()
 </form>
-<button onclick="jQuery('form[name=form_$:id]').submit()">Save</button>
-<button onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_$:id]').submit();">Save and New</button>
+<button name="save" onclick="jQuery('form[name=form_$:id]').submit()">Save</button>
+<button name="save_new" onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_$:id]').submit();">Save and New</button>
 <script type='text/javascript'>
   jQuery(document).ready(function(){
     jQuery("select").select2();

@@ -7,3 +7,12 @@ input{
   padding: 4px;
   box-shadow: none;
 }
+.datafield, .headerfield{
+  margin-left: 10px;
+  min-width: 100px;
+  display: inline-block;
+}
+.headerfield{
+  font-size: 1.2em;
+  font-weight: bold;
+}

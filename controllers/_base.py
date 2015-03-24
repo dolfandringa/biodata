@@ -1,8 +1,23 @@
 from web import form
 import web
-from util import get_fields, get_relation_attributes, get_simple_columns
+from util import get_fields, get_relation_attributes, get_simple_columns,get_values
+import pdb
 
 render = web.template.render('templates/')
+
+
+class BaseShowController:
+
+    def GET(self,id):
+        print('id: %s'%id)
+        cls=self.__class__.ORM_CLS
+        inst=web.ctx.orm.query(cls).get(id)
+        print inst
+        if inst==None:
+            raise web.InternalError("Error 500: %s with id %s not found"%(cls.__name__,id))
+        fields=get_values(inst)
+        print(fields)
+        return render.show(cls.__name__,id,fields)
 
 class BaseController:
 
@@ -45,9 +60,13 @@ class BaseController:
                 print('value: %s'%val)
                 setattr(inst,attr.key,val)
             orm.add(inst)
+            orm.commit()
+            pdb.set_trace()
             if f['redirect'].value == 'form':
                 #redirect to the form again, empty values the form first
                 f.fill(source=dict([(k.name,None) for k in f.inputs]))
                 return render.form(f,self.__class__.ID,self.__class__.TITLE, web.url())
+            elif f['redirect'].value == 'ajax':
+                return web.seeother('/%s'%inst.id)
             else:
                 return web.seeother('/')
