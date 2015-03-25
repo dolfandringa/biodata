@@ -1,4 +1,3 @@
-#Hallo
 import web
 import datetime
 from web import form

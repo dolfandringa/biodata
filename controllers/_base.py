@@ -1,4 +1,3 @@
-#Hallo
 from web import form
 import web
 from util import get_fields, get_relation_attributes, get_simple_columns,get_values

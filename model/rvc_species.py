@@ -1,4 +1,3 @@
-#Hallo
 from _base import Base, BaseSample, BaseObservation
 from _base import BaseObserver, BaseSite
 from sqlalchemy import Column, Integer, String, Unicode, Table, Date, Time

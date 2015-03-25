@@ -1,4 +1,3 @@
-#Hallo
 import web
 from web import form
 from model import *
