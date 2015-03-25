@@ -1,25 +1,102 @@
+<!-- Hallo -->
 <html>
 <head>
 <title>Biodata</title>
 <script src="/static/scripts/jquery-1.11.2.min.js"></script>
 <link href="/static/css/select2.min.css" rel="stylesheet" />
 <link href="/static/css/styles.css" rel="stylesheet" />
+<link href="/static/css/jquery-ui.min.css" rel="stylesheet" />
+<link href="/static/css/jquery-ui.structure.min.css" rel="stylesheet" />
+<link href="/static/css/jquery-ui.theme.min.css" rel="stylesheet" />
+<script src="/static/scripts/jquery-ui.min.js"></script>
 <script src="/static/scripts/select2.min.js"></script>
+<script src="/static/scripts/jquery.form.js"></script>
 <script type="text/javascript">
-jQuery(document).ready(function(){
-  jQuery.get("/sample/new",function(data){
-    jQuery("#form1").html(data);
-    jQuery('#form1 input[name=redirect]').val('ajax')
-    jQuery("#form1 form").ajaxForm({
+function setObservationList(sampleid){
+  jQuery.get("/observation/?sampleid="+sampleid,function(data){
+    obsList = jQuery("#observationList");
+    if(obsList.length==0){
+      obsList = jQuery("<div class='ajaxform list' id='observationList'></div>");
+      jQuery("#forms").append(obsList);
+    }
+    obsList.html(data);
+  });
+}
+function setObservationForm(){
+    jQuery('#observationForm form').ajaxForm({
       success:function(data,textStatus){
-        console.log(data);
-        console.log(textStatus);
-        console.log('success');
-        jQuery("#form1").html(data);
+        obsForm=jQuery("#observationForm")
+        obsForm.html(data);
+        setModalLinks(obsForm);
+        obsForm.find('button[name="save"]').remove();
+        jQuery('#messages').html("<div class='message'>Observation saved.</div>");
+        setObservationList(sampleid=sampleid);
+        setObservationForm();
         },
       error:function(data,textStatus){
-        console.log(data);
-        console.log(textStatus);
+        console.log('error');
+      }
+    });
+}
+function getObservationForm(sampleid){
+  jQuery.get("/observation/new?sample="+sampleid,function(data){
+    obsForm=jQuery('#observationForm')
+    if(obsForm.length==0){
+      obsForm=jQuery("<div class='ajaxform' id='observationForm'></div>");
+      jQuery("#forms").append(obsForm);
+    }
+    obsForm.html(data);
+    obsForm.find('button[name="save"]').remove();
+    setModalLinks(obsForm);
+    setObservationForm();
+  });
+}
+function setModalLinks(obj){
+  console.log(obj);
+  obj.find('a.addlink').click(function(){
+    url=jQuery(this).attr('href')
+    console.log(url);
+    jQuery.get(url,function(data){
+      dialog=jQuery("<div class='modalForm'></div>");
+      console.log(data);
+      dialog.html(data)
+      jQuery('body').append(dialog);
+      dialog = dialog.dialog({
+        autoOpen: false,
+        width: 400,
+        modal: true,
+        buttons: {
+          Save: function(){
+            jQuery(this).dialog("close");
+          }
+        }
+      });
+      dialog.dialog("open");
+      dialog.find('button').remove();
+    });
+    return false;
+  });
+}
+jQuery(document).ready(function(){
+  jQuery.get("/sample/new",function(data){
+    sampleform = jQuery('#sampleForm');
+    if (sampleform.length == 0){
+      sampleform = jQuery("<div class='ajaxForm' id='sampleForm'></div>");
+      jQuery("#forms").append(sampleform);
+    }
+    sampleform.html(data);
+    setModalLinks(sampleform);
+    sampleform.find('button[name="save_new"]').remove();
+    jQuery('#sampleForm form').ajaxForm({
+      success:function(data,textStatus){
+        jQuery("#sampleForm").html(data);
+        setModalLinks(jQuery(data));
+        sampleid=jQuery("#sampleForm input[name='id']").val();
+        jQuery('#messages').append("<div class='message'>Sample saved.</div>");
+        setObservationList(sampleid=sampleid);
+        getObservationForm(sampleid=sampleid);
+        },
+      error:function(data,textStatus){
         console.log('error');
       }
     });
@@ -28,9 +105,8 @@ jQuery(document).ready(function(){
 </script>
 </head>
 <body>
-  <div id="form1"></div>
-  <div id="form2"></div>
-  <div id="form3"></div>
-  <div id="form4"></div>
+  <div id='messages'></div>
+  <div id="forms">
+  </div>
 </body>
 </html>

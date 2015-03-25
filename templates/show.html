@@ -1,4 +1,5 @@
 $def with (classname,id,fields)
+<!-- Hallo -->
 <html>
 <head>
 <title>$:classname $:id</title>
@@ -9,6 +10,8 @@ $def with (classname,id,fields)
 <script src="/static/scripts/jquery.form.js"></script>
 </head>
 <body id="$:classname$:id" class="show_$:classname">
+
+<input type="Hidden" name="id" value="$:id" />
 $for k,v in fields.items():
   <div class='datarow'>
     <span class='headerfield'>$:k</span><span class='datafield'>$:v</span>

@@ -1,24 +1,19 @@
-$def with (observations)
+$def with (observations,fields)
+<!-- Hallo -->
 <html>
 <head>
 <title>Observations</title>
 <link href="/static/css/styles.css" rel="stylesheet" />
 </head>
-<body>
+<body id='observationList' class='list'>
   <div class="headerrow">
-    <span class='headerfield'>Date</span>
-    <span class='headerfield'>Time</span>
-    <span class='headerfield'>Site</span>
-    <span class='headerfield'>Observer</span>
-    <span class='headerfield'>Species</span>
+    $for k in fields:
+      <span class='headerfield $k'>$k</span>
   </div>
-  $for observation in observations:
-    <div class='datarow'>
-        <span class="datafield">$observation.sample.date</span>
-        <span class="datafield">$observation.sample.time</span>
-        <span class="datafield">$observation.sample.site.name</span>
-        <span class="datafield">$observation.observer.name</span>
-        <span class="datafield">$observation.species.common_name</span>
+  $for i,obs in enumerate(observations):
+    <div class='datarow $ ["even","odd"][i%2]'>
+      $for k in fields:
+        <span class="datafield $k">$(obs[k] or '')</span>
     </div>
 </body>
 </html>

@@ -1,3 +1,4 @@
+#Hallo
 import web
 import datetime
 from web import form
@@ -20,7 +21,7 @@ __type_map = {
         'args':[
             form.Validator(
                 'Please enter a whole number (no decimals)',
-                lambda v: form.utils.getint(v,None) != None
+                lambda v: form.utils.intget(v,None) != None
             )
         ]
     },
@@ -52,10 +53,18 @@ def get_data_attributes(obj):
             continue
         yield attr
 
+def get_colnames(cls):
+    columns = [c.name for c in get_simple_columns(cls)]
+    rel_columns = [c.key for c in get_relation_attributes(cls)]
+    return columns+rel_columns
+
 def get_values(inst):
-    columns = [c.name for c in get_simple_columns(inst.__class__)]
-    rel_columns = [c.key for c in get_relation_attributes(inst.__class__)]
-    return dict([(c,str(getattr(inst,c))) for c in columns+rel_columns])
+    values = []
+    for c in get_colnames(inst.__class__):
+        v=getattr(inst,c)
+        v=v and form.utils.intget(v) or (v and str(v) or None)
+        values.append((c,v))
+    return OrderedDict(values)
 
 
 def get_simple_columns(obj):
@@ -93,7 +102,7 @@ def get_fields(obj,orm):
         fields[fname]=form.Dropdown(
                         fname,
                         [(v.id, str(v)) for v in values],
-                        post="<a href='/%s/new'>Add %s</a>"%(fname,fname))
+                        post="<a class='addlink' href='/%s/new'>Add %s</a>"%(fname,fname))
     for c in get_simple_columns(obj):
         fields[c.name]=map_column_type(c)
 

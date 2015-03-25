@@ -1,3 +1,4 @@
+#Hallo
 from _base import Base, BaseSample, BaseObservation
 from _base import BaseObserver, BaseSite
 from sqlalchemy import Column, Integer, String, Unicode, Table, Date, Time
@@ -16,8 +17,6 @@ class Observer(BaseObserver):
 class Observation(BaseObservation):
     species_id = Column(Integer, ForeignKey("species.id"))
     species = relationship("Species", backref="observations")
-    amount = Column(Integer)
-    total_score = Column(Integer)
     score_0_9 = Column(Integer)
     score_10_19 = Column(Integer)
     score_20_29 = Column(Integer)

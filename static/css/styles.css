@@ -1,3 +1,6 @@
+/*
+Hallo
+*/
 input,select{
   margin: 2px 0px;
 }
@@ -7,6 +10,14 @@ input{
   padding: 4px;
   box-shadow: none;
 }
+.ajaxform{
+  border: 1px solid grey;
+  border-radius: 5px;
+  padding: 10px;
+  width: 95%;
+  margin: 10px auto;
+}
+
 .datafield, .headerfield{
   margin-left: 10px;
   min-width: 100px;
@@ -15,4 +26,36 @@ input{
 .headerfield{
   font-size: 1.2em;
   font-weight: bold;
+}
+#observationForm table{
+  display: block;
+  overflow: visible;
+}
+form[name='form_observation'] table tr{
+  display: inline-block;
+  margin: 5px;
+}
+form[name='form_observation'] table th,
+form[name='form_observation'] table td{
+  min-width: 150px;
+  text-align: left;
+  display: block;
+  margin: 5px 0px;
+}
+
+#observationList .headerrow span.sample,
+#observationList .datarow span.sample{
+  min-width: 350px;
+}
+.list .headerrow,
+.list .datarow
+{
+  margin-top: 5px;
+  padding: 2px 0px;
+}
+.list .datarow.odd{
+  background-color: lightgrey;
+}
+.list .datarow.even{
+  background-color: white;
 }
