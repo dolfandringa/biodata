@@ -1,7 +1,7 @@
 from web import form
 import web
 from util import get_fields, get_relation_attributes, get_simple_columns,get_values
-#import pdb
+import pdb
 
 render = web.template.render('templates/')
 
@@ -70,10 +70,13 @@ class BaseController:
                 #we're dealing with an ajax request
                 if f['redirect'].value == 'form':
                     #back to the form with the same values.
-                    f.fill(source=dict([(k.name,k.value) for k in f.inputs if isinstance(k,form.Dropdown)]))
+                    f.fill(source=dict([(k.name,k.value) for k in f.inputs if isinstance(k,form.Dropdown) or isinstance(k,form.Hidden)]))
                     return render.form(f,self.__class__.ID,self.__class__.TITLE, web.url())
                 else:
                     #show the added item
+                    #return web.seeother('/%s'%inst.id)
+                    print('returning other request');
+                    #pdb.set_trace()
                     return web.seeother('/%s'%inst.id)
             elif f['redirect'].value == 'form':
                 #redirect to the form again, empty values in the form first
