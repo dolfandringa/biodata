@@ -56,3 +56,9 @@ form[name='form_observation'] table td{
 .list .datarow.even{
   background-color: white;
 }
+
+.modalForm iframe{
+  width: 95%;
+  height: 95%;
+  border: none;
+}

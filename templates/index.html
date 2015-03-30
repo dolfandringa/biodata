@@ -11,31 +11,68 @@
 <script src="/static/scripts/select2.min.js"></script>
 <script src="/static/scripts/jquery.form.js"></script>
 <script type="text/javascript">
-function setObservationList(sampleid){
-  jQuery.get("/observation/?sampleid="+sampleid,function(data){
-    obsList = jQuery("#observationList");
-    if(obsList.length==0){
-      obsList = jQuery("<div class='ajaxform list' id='observationList'></div>");
-      jQuery("#forms").append(obsList);
-    }
-    obsList.html(data);
-  });
+
+var formContainer = function (id,classes) {
+  this.id = id
+  classes = classes || []
+  this.classes=['ajaxForm'].concat(classes)
+};
+
+formContainer.prototype.render = function(params){
+  this.container = jQuery("#"+this.id)
+  if (this.container.length==0){
+      this.container = jQuery("<div class='"+this.classes.join(" ")+"' id='"+this.id+"'></div>");
+      jQuery("#forms").append(this.container);
+  }
 }
-function setObservationForm(){
-    jQuery('#observationForm form').ajaxForm({
+
+var ObservationList = function(){
+  this.url='/observation/'
+  formContainer.call(this, id='ObservationList', classes=['list']);
+}
+ObservationList.prototype = Object.create(formContainer.prototype);
+ObservationList.prototype.constructor = ObservationList;
+ObservationList.prototype.render = function(){
+  formContainer.prototype.render.call(this,arguments)
+  jQuery.ajax({method:'get',url:this.url+'?'+jQuery.param(params),context:this,success:function(data){
+    console.log(this.container);
+    this.container.html(data)
+  }});
+}
+
+var ObservationForm = function(){
+  formContainer.call(this, id='observationForm' classes=[]);
+}
+ObservationForm.prototype = Object.create(formContainer.prototype);
+ObservationForm.prototype.constructor = ObservationForm;
+ObservationForm.prototype.render = function(){
+  formContainer.prototype.render.apply(this,arguments);
+  this.container.find('form').submit(function(e){
+    e.preventDefault();
+    jQuery.ajax({
+      method:"POST",
+      url: jQuery(this).attr('action'),
+      data: jQuery(this).serialize(),
       success:function(data,textStatus){
         obsForm=jQuery("#observationForm")
         obsForm.html(data);
         setModalLinks(obsForm);
         obsForm.find('button[name="save"]').remove();
         jQuery('#messages').html("<div class='message'>Observation saved.</div>");
-        setObservationList(sampleid=sampleid);
+        obsList.render({sampleid:sampleid});
         setObservationForm();
         },
       error:function(data,textStatus){
         console.log('error');
       }
     });
+    return false;
+  });
+}
+
+var obsList = new ObservationList();
+
+function setObservationForm(){
 }
 function getObservationForm(sampleid){
   jQuery.get("/observation/new?sample="+sampleid,function(data){
@@ -55,23 +92,37 @@ function setModalLinks(obj){
   obj.find('a.addlink').click(function(){
     url=jQuery(this).attr('href')
     console.log(url);
-    jQuery.get(url,function(data){
-      dialog=jQuery("<div class='modalForm'></div>");
-      console.log(data);
-      dialog.html(data)
-      jQuery('body').append(dialog);
-      dialog = dialog.dialog({
-        autoOpen: false,
-        width: 400,
-        modal: true,
-        buttons: {
-          Save: function(){
-            jQuery(this).dialog("close");
-          }
+    dialog=jQuery("<div class='modalForm'><iframe src='"+url+"'></iframe></div>");
+    jQuery('body').append(dialog);
+    dialog = dialog.dialog({
+      autoOpen: false,
+      width: 400,
+      height: 400,
+      modal: true,
+      buttons: {
+        Save: function(){
+          jQuery(this).find("iframe").contents().find("form").submit();
+          jQuery(this).dialog("close");
         }
+      }
+    });
+    dialog.dialog("open");
+    console.log(dialog.find('iframe'));
+    dialog.find('iframe').load(function(){
+      contents=jQuery('iframe').contents();
+      contents.find('button').remove();
+      contents.find("form").submit(function(e){
+        e.preventDefault();
+        jQuery.ajax({
+          method: "POST",
+          url: jQuery(this).attr('action'),
+          data: jQuery(this).serialize(),
+          success: function(e){
+            console.log(e);
+          }
+        });
+        return false;
       });
-      dialog.dialog("open");
-      dialog.find('button').remove();
     });
     return false;
   });
@@ -86,18 +137,25 @@ jQuery(document).ready(function(){
     sampleform.html(data);
     setModalLinks(sampleform);
     sampleform.find('button[name="save_new"]').remove();
-    jQuery('#sampleForm form').ajaxForm({
-      success:function(data,textStatus){
-        jQuery("#sampleForm").html(data);
-        setModalLinks(jQuery(data));
-        sampleid=jQuery("#sampleForm input[name='id']").val();
-        jQuery('#messages').append("<div class='message'>Sample saved.</div>");
-        setObservationList(sampleid=sampleid);
-        getObservationForm(sampleid=sampleid);
+    jQuery('#sampleForm form').submit(function(e){
+      e.preventDefault();
+      jQuery.ajax({
+        method: "POST",
+        url: jQuery(this).attr('action'),
+        data: jQuery(this).serialize(),
+        success:function(data,textStatus){
+          jQuery("#sampleForm").html(data);
+          setModalLinks(jQuery(data));
+          sampleid=jQuery("#sampleForm input[name='id']").val();
+          jQuery('#messages').append("<div class='message'>Sample saved.</div>");
+          obsList.render({sampleid:sampleid})
+          getObservationForm(sampleid=sampleid);
         },
-      error:function(data,textStatus){
-        console.log('error');
-      }
+        error:function(data,textStatus){
+          console.log('error');
+        }
+      });
+      return false;
     });
   });
 });
