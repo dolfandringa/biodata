@@ -3,12 +3,14 @@ import web
 from util import get_fields, get_relation_attributes, get_simple_columns,get_values, parse_accept, get_colnames
 import json
 import pdb
+import logging as log
 
 render = web.template.render('templates/')
 
 
 class BaseListController:
     def GET(self):
+        web.ctx.orm.flush()
         params = web.input()
         if params:
             instances = web.ctx.orm.query(self.__class__.ORM_CLS).filter_by(**params).all()
@@ -24,14 +26,11 @@ class BaseListController:
 class BaseShowController:
 
     def GET(self,id):
-        print('id: %s'%id)
         cls=self.__class__.ORM_CLS
         inst=web.ctx.orm.query(cls).get(id)
-        print inst
         if inst==None:
             raise web.InternalError("Error 500: %s with id %s not found"%(cls.__name__,id))
         fields=get_values(inst)
-        print(fields)
         return render.show(cls.__name__,id,fields)
 
 class BaseController:
@@ -80,6 +79,7 @@ class BaseController:
                 setattr(inst,attr.key,val)
             orm.add(inst)
             orm.commit()
+            log.debug('changes committed')
             #handle the resulting redirection.
             if 'HTTP_X_REQUESTED_WITH' in web.ctx.environ.keys():
                 #we're dealing with an ajax request
@@ -90,7 +90,7 @@ class BaseController:
                 else:
                     #show the added item
                     #return web.seeother('/%s'%inst.id)
-                    print('returning other request');
+                    log.debug('returning show page');
                     return web.seeother('/%s'%inst.id)
             elif f['redirect'].value == 'form':
                 #redirect to the form again, empty values in the form first

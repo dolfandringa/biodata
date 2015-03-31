@@ -13,6 +13,7 @@ $def with (form,id,title,action)
 <script src="/static/scripts/jquery.form.js"></script>
 </head>
 <body>
+<div>
 <form name="form_$id" method="post" action="$action"> 
 $if not form.valid: <p class="error">An error occured. Please try again.</p>
 $:form.render()
@@ -24,5 +25,6 @@ $:form.render()
     jQuery("form[name=form_$id] select").select2();
   });
 </script>
+</div>
 </body>
 </html>

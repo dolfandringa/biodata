@@ -128,7 +128,8 @@ def get_fields(obj,orm):
         fields[fname]=form.Dropdown(
                         fname,
                         [(v.id, str(v)) for v in values],
-                        post="<a class='addlink' href='/%s/new'>Add %s</a>"%(fname,fname))
+                        post="<a class='addlink' href='/%s/new'>Add %s</a>"%(fname,fname),
+                        **{'data-values_url':'/%s/'%fname})
     for c in get_simple_columns(obj):
         fields[c.name]=map_column_type(c)
 

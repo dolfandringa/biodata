@@ -2,6 +2,10 @@ import web
 from controllers import site, sample, observation, species, observer
 from sqlalchemy.orm import scoped_session, sessionmaker
 from model import *
+import sys
+import logging
+
+logging.basicConfig(stream=sys.stdout,level=logging.DEBUG,format="%(asctime)s - %(levelname)s - %(name)s - %(message)s")
 
 def load_sqla(handler):
     web.ctx.orm = scoped_session(sessionmaker(bind=engine))
