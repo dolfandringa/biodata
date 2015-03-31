@@ -19,7 +19,6 @@ render = web.template.render('templates/')
 
 class list(BaseListController):
     ORM_CLS = rvc_species.Site
-    TEMPLATE = render.sites_list
 
 
 class show(BaseShowController):

@@ -1,3 +1,4 @@
+$def with(datasets)
 <html>
 <head>
 <title>Biodata</title>
@@ -16,249 +17,21 @@ if (!Array.prototype.last){
         return this[this.length - 1];
     };
 };
-
-function updateSelect(obj){
-  select=obj.find('select')
-  url=select.attr('data-values_url')
-  jQuery.ajax({dataType:'json',method:'get',url:url,success:function(data){
-    select=jQuery(select);
-    data2=new Array();
-    for (k in data){
-      if(data[k][0]==undefined){
-        continue;
-      }
-      data2.push({id:data[k][0],text:data[k][1]})
-    }
-    select.select2('destroy');
-    select.select2({data:data2});
-    console.log('last value');
-    console.log(data2.last());
-    select.val(data2.last().id).trigger('change');
-  }});
-}
-var temp;
-
-function cleanupModalForm(dialog,container){
-  console.log('cleanupModalForm');
-  contents=dialog.find('iframe').contents();
-  contents.find('button').remove();
-  console.log("NUmber of forms: "+contents.find("form").length)
-  contents.find("form").submit(function(e){
-    console.log('submitting');
-    e.preventDefault();
-    jQuery.ajax({
-      method: "POST",
-      url: jQuery(this).attr('action'),
-      data: jQuery(this).serialize(),
-      success: function(data){
-        data=jQuery(data);
-        if(data.find('form').length==0){
-          console.log('succeeded');
-          updateSelect(container)
-          dialog.dialog("close");
-        }
-        else{
-          dialog.find('iframe').contents().children().first().html(data.children().first());
-          console.log('not succeeded');
-          cleanupModalForm(dialog,container);
-        }
-      }
-    });
-    return false;
-  });
-}
-
-function setModalLinks(container){
-  obj=container.container;
-  obj.find('a.addlink').click(function(e){
-    container=jQuery(this).parent()
-    url=jQuery(this).attr('href')
-    dialog=jQuery("<div class='modalForm'><iframe src='"+url+"'></iframe></div>");
-    jQuery('body').append(dialog);
-    dialog = dialog.dialog({
-      autoOpen: false,
-      width: 400,
-      height: 400,
-      modal: true,
-      buttons: {
-        Save: function(){
-          jQuery(this).find("iframe").contents().find("form").submit();
-        }
-      }
-    });
-    dialog.dialog("open");
-    dialog.find('iframe').load(function(){
-      cleanupModalForm(dialog,container);
-    });
-    return false;
-  });
-}
-
-var formContainer = function (id,classes) {
-  this.id = id;
-  classes = classes || [];
-  this.classes = ['ajaxForm'].concat(classes);
-  this.container = null;
-};
-
-formContainer.prototype.render = function(params){
-  this.container = jQuery("#"+this.id)
-  this.params = params || {}
-  if (this.container.length==0){
-      this.container = jQuery("<div class='"+this.classes.join(" ")+"' id='"+this.id+"'></div>");
-      jQuery("#forms").append(this.container);
-  }
-}
-
-var ObservationList = function(){
-  this.url='/observation/'
-  formContainer.call(this, id='ObservationList', classes=['list']);
-}
-ObservationList.prototype = Object.create(formContainer.prototype);
-ObservationList.prototype.constructor = ObservationList;
-ObservationList.prototype.render = function(){
-  formContainer.prototype.render.apply(this,arguments)
-  jQuery.ajax({method:'get',url:this.url+'?'+jQuery.param(this.params),context:this,success:function(data){
-    this.container.html(data)
-  }});
-}
-
-var ObservationForm = function(){
-  this.url='/observation/new';
-  formContainer.call(this, id='observationForm', classes=[]);
-}
-ObservationForm.prototype = Object.create(formContainer.prototype);
-ObservationForm.prototype.constructor = ObservationForm;
-ObservationForm.prototype.setSaveButtons = function(){
-  this.container.find('button[name="save"]').remove();
-  this.container.find('button[name=save_new]').removeAttr('onclick');
-  form=this.container.find('form')
-  this.container.find('button[name="save_new"]').click({form:form},function(e){
-    e.data.form.find('input[name=redirect]').val('form');
-    e.data.form.submit();
-  });
-}
-ObservationForm.prototype.render = function(){
-  if(this.container == null){
-    formContainer.prototype.render.apply(this,arguments);
-    this.getAjaxForm();
-  }
-  else{
-    formContainer.prototype.render.apply(this,arguments);
-    this.setAjaxForm();
-  }
-}
-
-ObservationForm.prototype.getAjaxForm = function(){
-  url=this.url+'?'+jQuery.param(this.params)
-  jQuery.ajax({
-    url:url,
-    method:'get',
-    context:this,
-    success: function(data){
-      this.container.html(data);
-      this.setAjaxForm();
-      setModalLinks(this);
-      this.setSaveButtons();
-    }
-  });
-}
-
-ObservationForm.prototype.setAjaxForm = function(){
-  this.container.find('form').submit(function(e){
-    e.preventDefault();
-    jQuery.ajax({
-      method:"POST",
-      url: jQuery(this).attr('action'),
-      data: jQuery(this).serialize(),
-      success:function(data,textStatus){
-        obsForm.container.html(data)
-        obsForm.setAjaxForm();
-        setModalLinks(obsForm);
-        obsForm.setSaveButtons();
-        jQuery('#messages').html("<div class='message'>Observation saved.</div>");
-        obsList.render({sample_id:obsForm.params['sample']});
-      },
-      error:function(data,textStatus){
-        console.log('error');
-      }
-    });
-    return false;
-  });
-}
-
-
-
-var SampleForm = function(){
-  this.url='/sample/new';
-  formContainer.call(this, id='sampleForm', classes=[]);
-}
-SampleForm.prototype = Object.create(formContainer.prototype);
-SampleForm.prototype.constructor = SampleForm;
-SampleForm.prototype.setSaveButtons = function(){
-  this.container.find('button[name="save_new"]').remove();
-  this.container.find('button[name=save]').removeAttr('onclick');
-  form=this.container.find('form')
-  this.container.find('button[name="save"]').click({form:form},function(e){
-    e.data.form.submit();
-  });
-}
-
-SampleForm.prototype.render = function(){
-  formContainer.prototype.render.apply(this,arguments)
-  jQuery.ajax({
-    url:this.url,
-    method:'GET',
-    context:this,
-    success:function(data){
-      this.container.html(data)
-      this.setAjaxForm();
-      this.setSaveButtons();
-      setModalLinks(this);
-    }
-  });
-}
-SampleForm.prototype.setAjaxForm = function(){
-  form = this.container.find("form");
-  this.container.find("form").submit(function(e){
-    e.preventDefault();
-    jQuery.ajax({
-      method: "POST",
-      url: jQuery(this).attr('action'),
-      data: jQuery(this).serialize(),
-      success:function(data,textStatus){
-        samForm.container.html(data);
-        setModalLinks(samForm);
-        samForm.setAjaxForm();
-        samForm.setSaveButtons();
-        sampleid=samForm.container.find("input[name='id']").val();
-        if(sampleid!=undefined){
-            jQuery('#messages').append("<div class='message'>Sample saved.</div>");
-            obsList.render({sample_id:sampleid})
-            obsForm.render({sample:sampleid});
-        }
-      },
-      error:function(data,textStatus){
-        console.log('error');
-      }
-    });
-    return false;
-  });
-}
-
-
-var obsList = new ObservationList();
-var obsForm = new ObservationForm();
-var samForm = new SampleForm();
-
 jQuery(document).ready(function(){
-  samForm.render();
+  jQuery("#dataset").change(function(e){
+    url='/new?'+jQuery.param({dataset:jQuery(this).val()}) 
+    console.log('redirecting to '+url);
+    window.location.replace(url);
+  });
 });
 </script>
 </head>
-<body id='dataEntryForm'>
+<body id='datasetSelect'>
   <div id='messages'></div>
-  <div id="forms">
-  </div>
+  <select id='dataset'>
+    <option>-- Select a dataset --</option>
+  $for dataset in datasets:
+    <option>$dataset</option>
+  </select>
 </body>
 </html>

@@ -1,7 +1,7 @@
 import web
 from web import form
 from model import *
-from _base import BaseController, BaseShowController
+from _base import BaseController, BaseShowController, BaseListController
 
 urls = (
     "/", "list",
@@ -14,10 +14,8 @@ render = web.template.render('templates/')
 
 
 
-class list:
-    def GET(self):
-        samples = web.ctx.orm.query(rvc_species.Sample).all()
-        return render.sample_list(samples)
+class list(BaseListController):
+    ORM_CLS = rvc_species.Sample
 
 
 class show(BaseShowController):

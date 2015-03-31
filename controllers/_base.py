@@ -20,7 +20,7 @@ class BaseListController:
         if accept[0]['media_type']=='application/json':
             return json.dumps([(s.id,str(s)) for s in instances])
         else:
-            return self.__class__.TEMPLATE([get_values(i) for i in instances],get_colnames(self.__class__.ORM_CLS))
+            return render.instance_list([get_values(i) for i in instances],get_colnames(self.__class__.ORM_CLS))
 
 
 class BaseShowController:

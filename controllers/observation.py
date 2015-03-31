@@ -15,7 +15,6 @@ render = web.template.render('templates/')
 
 class list(BaseListController):
     ORM_CLS = rvc_species.Observation
-    TEMPLATE = render.observation_list
 
 class show(BaseShowController):
     ORM_CLS=rvc_species.Observation

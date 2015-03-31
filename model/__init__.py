@@ -6,6 +6,9 @@ config.read('settings.cfg')
 uri=config.get('database','uri')
 engine = create_engine(uri)
 
+datasets = [rvc_species]
+
 if __name__ == "__main__":
     from sqlalchemy.ext.declarative import declarative_base
-    rvc_species.Base.metadata.create_all(engine)
+    for dataset in datasets:
+        dataset.Base.metadata.create_all(engine)

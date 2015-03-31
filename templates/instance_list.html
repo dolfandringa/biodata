@@ -1,4 +1,4 @@
-$def with (observations,fields)
+$def with (instances,fields)
 <html>
 <head>
 <title>Observations</title>
@@ -9,10 +9,10 @@ $def with (observations,fields)
     $for k in fields:
       <span class='headerfield $k'>$k</span>
   </div>
-  $for i,obs in enumerate(observations):
+  $for i,inst in enumerate(instances):
     <div class='datarow $ ["even","odd"][i%2]'>
       $for k in fields:
-        <span class="datafield $k">$(obs[k] or '')</span>
+        <span class="datafield $k">$(inst[k] or '')</span>
     </div>
 </body>
 </html>

@@ -30,4 +30,4 @@ class Species(Base):
     def __str__(self):
         return self.common_name
 
-__tables__ = (Sample, Observer, Observation, Species, Site)
+tables = (Sample, Observer, Observation, Species, Site)
