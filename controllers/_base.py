@@ -1,9 +1,24 @@
 from web import form
 import web
-from util import get_fields, get_relation_attributes, get_simple_columns,get_values
+from util import get_fields, get_relation_attributes, get_simple_columns,get_values, parse_accept, get_colnames
+import json
 import pdb
 
 render = web.template.render('templates/')
+
+
+class BaseListController:
+    def GET(self):
+        params = web.input()
+        if params:
+            instances = web.ctx.orm.query(self.__class__.ORM_CLS).filter_by(**params).all()
+        else:
+            instances = web.ctx.orm.query(self.__class__.ORM_CLS).all()
+        accept = parse_accept(web.ctx.env['HTTP_ACCEPT'])
+        if accept[0]['media_type']=='application/json':
+            return json.dumps([(s.id,str(s)) for s in instances])
+        else:
+            return self.__class__.TEMPLATE([get_values(i) for i in instances],get_colnames(self.__class__.ORM_CLS))
 
 
 class BaseShowController:
@@ -76,7 +91,6 @@ class BaseController:
                     #show the added item
                     #return web.seeother('/%s'%inst.id)
                     print('returning other request');
-                    #pdb.set_trace()
                     return web.seeother('/%s'%inst.id)
             elif f['redirect'].value == 'form':
                 #redirect to the form again, empty values in the form first

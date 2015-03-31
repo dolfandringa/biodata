@@ -1,4 +1,4 @@
-$def with (observers)
+$def with (observers,fields)
 <html>
 <head>
 <title>Observers</title>
@@ -16,11 +16,13 @@ $def with (observers)
 </head>
 <body>
   <div class="headerrow">
-    <span class='headerfield'>Name</span>
+    $for k in fields:
+      <span class='headerfield $k'>$k</span>
   </div>
-  $for obs in observers:
-    <div class='datarow'>
-        <span class="datafield">$obs.name</span>
+  $for i,obs in enumerate(observers):
+    <div class='datarow $ ["even","odd"][i%2]'>
+      $for k in fields:
+        <span class="datafield $k">$(obs[k] or '')</span>
     </div>
 </body>
 </html>

@@ -1,7 +1,10 @@
 import web
 from web import form
 from model import *
-from _base import BaseController, BaseShowController
+from _base import BaseController, BaseShowController, BaseListController
+import pdb
+from collections import OrderedDict
+import json
 
 urls = (
     "/", "list",
@@ -14,10 +17,9 @@ render = web.template.render('templates/')
 
 
 
-class list:
-    def GET(self):
-        sites = web.ctx.orm.query(rvc_species.Site).all()
-        return render.sites_list(sites)
+class list(BaseListController):
+    ORM_CLS = rvc_species.Site
+    TEMPLATE = render.sites_list
 
 
 class show(BaseShowController):

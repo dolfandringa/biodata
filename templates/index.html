@@ -11,6 +11,18 @@
 <script src="/static/scripts/select2.min.js"></script>
 <script type="text/javascript">
 
+function updateSelect(obj){
+  select=obj.find('select')
+  url=select.attr('data-values_url')
+  jQuery.ajax({dataType:'json',context:select,method:'get',url:url,success:function(data){
+    data2=new Array();
+    for (k in data){
+      data2[]={id:data[k][0],text:data[k][1]}
+    }
+    select.select2({data:data2});
+  });
+}
+
 function setModalLinks(container){
   obj=container.container;
   obj.find('a.addlink').click(function(){

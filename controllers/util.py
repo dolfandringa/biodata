@@ -5,6 +5,33 @@ from sqlalchemy import types as sa_types
 from sqlalchemy.orm.properties import RelationshipProperty, ColumnProperty
 from collections import OrderedDict
 
+def parse_accept(header):
+    """Parses Accept: header.
+        >>> parse_accept("text/plain; q=0.5, text/html")
+        [{'media_type': 'text/html'}, {'q': 0.5, 'media_type': 'text/plain'}]
+    """
+    result= []
+    for media_range in header.split(','):
+        parts = media_range.split(';')
+        media_type = parts.pop(0).strip()
+        d = {'media_type': media_type}
+        for part in parts:
+            try:
+                k, v = part.split('=')
+                d[k.strip()] = v.strip()
+            except (IndexError, ValueError):
+                pass
+
+        try:
+            if 'q' in d:
+                d['q'] = float(d['q'])
+        except ValueError:
+            del d['q']
+
+        result.append(d)
+    result.sort(key=lambda m: m.get('q', 1.0), reverse=True)
+    return result
+
 def is_int_date(v):
     print('checking date value %s'%v)
     try:
