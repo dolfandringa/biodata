@@ -5,7 +5,6 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 import model
 import sys
 import logging as log
-import pdb
 
 web.config.debug = False
 
@@ -32,7 +31,6 @@ render = web.template.render('templates/')
 class new:
     def GET(self):
         global app
-        pdb.set_trace()
         dataset = web.input().dataset
         dataset = getattr(model,dataset)
         for obj in dataset.tables:

@@ -77,18 +77,25 @@ def get_data_attributes(obj):
         attr = getattr(obj,prop)
         if not hasattr(attr,'property'):
             continue
+        if hasattr(obj,'formfields') and prop in obj.formfields.keys() and obj.formfields[prop].get('skip',False)==True:
+            #This property should be skipped for the interface
+            continue
         yield attr
 
 def get_colnames(cls):
     columns = [c.name for c in get_simple_columns(cls)]
     rel_columns = [c.key for c in get_relation_attributes(cls)]
-    return columns+rel_columns
+    rel_multi_columns = [c.key for c in get_multi_relation_attributes(cls)]
+    return columns+rel_columns+rel_multi_columns
 
 def get_values(inst):
     values = []
     for c in get_colnames(inst.__class__):
         v=getattr(inst,c)
-        v=v and form.utils.intget(v) or (v and str(v) or None)
+        if isinstance(v,list):
+            v=",".join([v2 and str(v2) or None for v2 in v])
+        else:
+            v=v and form.utils.intget(v) or (v and str(v) or None)
         values.append((c,v))
     return OrderedDict(values)
 
@@ -117,24 +124,48 @@ def get_relation_attributes(obj):
                 continue
             yield attr
 
+def get_multi_relation_attributes(obj):
+    for attr in get_data_attributes(obj):
+        prop=attr.property
+        if isinstance(prop,RelationshipProperty) and prop.backref!=None:
+            target = prop.mapper.entity
+            target_prop = getattr(target,prop.backref).property
+            if prop.uselist == True and target_prop.uselist == True:
+                #this is a Many-to-Many relationship
+                yield attr
+
 def get_fields(obj,orm):
     fields = OrderedDict()
     for attr in get_relation_attributes(obj):
-        #turn foreign keys into dropboxes with the id as value 
+        #turn foreign keys into dropdowns with the id as value 
         #and the column "name" as description
         target = attr.property.mapper.entity
         values = orm.query(target).all()
-        fname = attr.key
+        fname = getattr(target,'pretty_name',attr.key)
         fields[fname]=form.Dropdown(
                         fname,
                         [(v.id, str(v)) for v in values],
                         post="<a class='addlink' href='/%s/new'>Add %s</a>"%(fname,fname),
                         **{'data-values_url':'/%s/'%fname})
+    for attr in get_multi_relation_attributes(obj):
+        #turn foreign keys for many-to-many relations into dropdowns with the id as value 
+        #and the column "name" as description
+        #the dropdown should allow multiple values
+        target = attr.property.mapper.entity
+        values = orm.query(target).all()
+        fname = getattr(target,'pretty_name',target.__name__)
+        fields[fname]=form.Dropdown(
+                        attr.key,
+                        [(v.id, str(v)) for v in values],
+                        post="<a class='addlink' href='/%s/new'>Add %s</a>"%(fname,fname),
+                        **{'multiple':True,'data-values_url':'/%s/'%fname})
     for c in get_simple_columns(obj):
         fields[c.name]=map_column_type(c)
 
     if hasattr(obj,'formfields'):
         for k,v in obj.formfields.items():
+            if v.get('skip',False) == True:
+                continue
             args=v.get('args',[])
             kwargs=v.get('kwargs',{})
             fields[k]=v['widget'](k,*args,**kwargs)

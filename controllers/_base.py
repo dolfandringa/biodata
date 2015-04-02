@@ -1,8 +1,8 @@
 from web import form
 import web
-from util import get_fields, get_relation_attributes, get_simple_columns,get_values, parse_accept, get_colnames
+from util import get_fields, get_relation_attributes, get_multi_relation_attributes
+from util import get_values, parse_accept, get_colnames, get_simple_columns
 import json
-import pdb
 import logging as log
 
 render = web.template.render('templates/')
@@ -59,7 +59,12 @@ class BaseController:
 
     def store_values(self,obj,orm):
         f = self.get_form(obj,orm)
-        source=dict([(k,form.utils.intget(v) or v) for k,v in web.input().items()])
+        #make a dictionary of fieldname,[] combinations for all "multiple" dropdrowns
+        #so we give those the correct default value to web.input
+        #to get lists as values instead of a single value.
+        #see http://webpy.org/cookbook/input
+        listfields = dict([(field.name,[]) for field in f.inputs if isinstance(field,form.Dropdown) and field.attrs.get('multiple',False)])
+        source=dict([(k,form.utils.intget(v) or v) for k,v in web.input(**listfields).items()])
         if not f.validates(source=source):
             #Validation failed. Back to the form with the error message
             ID = self.__class__.ID
@@ -77,6 +82,11 @@ class BaseController:
                 pkey = f[attr.key].value #primary key value from the form
                 val = orm.query(target).get(pkey) #get target instance from pkey
                 setattr(inst,attr.key,val)
+            for attr in get_multi_relation_attributes(obj):
+                target = attr.property.mapper.entity #target class
+                for v in f[attr.key].value:
+                    val = orm.query(target).get(v) #get target instance from pkey
+                    getattr(inst,attr.key).append(val)
             orm.add(inst)
             orm.commit()
             log.debug('changes committed')

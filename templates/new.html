@@ -33,7 +33,14 @@ function updateSelect(obj){
     select.select2({data:data2});
     console.log('last value');
     console.log(data2.last());
-    select.val(data2.last().id).trigger('change');
+    if (select.attr('multiple')=='multiple'){
+      val=select.val()
+      val.push(data2.last().id)
+    }
+    else{
+      val=data2.last().id
+    }
+    select.val(val).trigger('change');
   }});
 }
 var temp;
