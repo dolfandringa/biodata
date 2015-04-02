@@ -1,6 +1,5 @@
 import web
 from web import form
-from model import *
 from _base import BaseController, BaseShowController, BaseListController
 
 
@@ -12,6 +11,7 @@ def getApplication(orm_cls):
         "/new", "new",
         "/(.+)", "show"
     )
+
 
     class list(BaseListController):
         ORM_CLS = orm_cls

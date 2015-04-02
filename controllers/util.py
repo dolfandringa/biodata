@@ -5,6 +5,7 @@ from sqlalchemy import types as sa_types
 from sqlalchemy.orm.properties import RelationshipProperty, ColumnProperty
 from collections import OrderedDict
 
+
 def parse_accept(header):
     """Parses Accept: header.
         >>> parse_accept("text/plain; q=0.5, text/html")
