@@ -2,7 +2,6 @@ import web
 from web import form
 from model import *
 from _base import BaseController, BaseShowController, BaseListController
-import pdb
 from collections import OrderedDict
 import json
 

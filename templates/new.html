@@ -31,8 +31,6 @@ function updateSelect(obj){
     }
     select.select2('destroy');
     select.select2({data:data2});
-    console.log('last value');
-    console.log(data2.last());
     if (select.attr('multiple')=='multiple'){
       val=select.val()
       val.push(data2.last().id)
@@ -46,12 +44,9 @@ function updateSelect(obj){
 var temp;
 
 function cleanupModalForm(dialog,container){
-  console.log('cleanupModalForm');
   contents=dialog.find('iframe').contents();
   contents.find('button').remove();
-  console.log("NUmber of forms: "+contents.find("form").length)
   contents.find("form").submit(function(e){
-    console.log('submitting');
     e.preventDefault();
     jQuery.ajax({
       method: "POST",
@@ -60,13 +55,11 @@ function cleanupModalForm(dialog,container){
       success: function(data){
         data=jQuery(data);
         if(data.find('form').length==0){
-          console.log('succeeded');
           updateSelect(container)
           dialog.dialog("close");
         }
         else{
           dialog.find('iframe').contents().children().first().html(data.children().first());
-          console.log('not succeeded');
           cleanupModalForm(dialog,container);
         }
       }
