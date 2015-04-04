@@ -42,8 +42,9 @@ class new:
         for obj in dataset.tables:
             application = getApplication(obj)
             name=obj.__name__.lower()
-            if "/%s" in app.mapping.keys():
-                del(app.mapping["/%s"%name])
+            if "/%s"%name in dict(app.mapping).keys():
+                index=app.mapping.index(('/%s'%name,dict(app.mapping)['/%s'%name]))
+                del(app.mapping[index])
             app.add_mapping("/%s"%name,application)
         return render.new()
 
