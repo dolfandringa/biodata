@@ -1,3 +1,9 @@
+import os
+import sys
+curdir = os.path.abspath(os.path.dirname(__file__))
+os.chdir(curdir)
+sys.path.append(curdir)
+
 import web
 from controllers import sample
 from controllers.dynamic_controller import getApplication
@@ -36,6 +42,8 @@ class new:
         for obj in dataset.tables:
             application = getApplication(obj)
             name=obj.__name__.lower()
+            if "/%s" in app.mapping.keys():
+                del(app.mapping["/%s"%name])
             app.add_mapping("/%s"%name,application)
         return render.new()
 
@@ -53,7 +61,7 @@ urls = (
 #    "/observer", observer.app,
 #    "/species", species.app
 )
-app = web.application(urls, globals())
+app = web.application(urls, globals(),autoreload=False)
 app.add_processor(load_sqla)
 
 if __name__ == "__main__":
