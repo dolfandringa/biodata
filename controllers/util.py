@@ -98,6 +98,7 @@ def get_values(inst):
         else:
             v=v and form.utils.intget(v) or (v and str(v) or None)
         values.append((c,v))
+    values.append(('id',inst.id))
     return OrderedDict(values)
 
 
@@ -146,8 +147,8 @@ def get_fields(obj,orm):
         fields[fname]=form.Dropdown(
                         fname,
                         [(v.id, str(v)) for v in values],
-                        post="<a class='addlink' href='/%s/new'>Add %s</a>"%(fname,fname),
-                        **{'data-values_url':'/%s/'%fname})
+                        post="<a class='addlink' href='%s/new'>Add %s</a>"%(fname,fname),
+                        **{'data-values_url':'%s/'%fname})
     for attr in get_multi_relation_attributes(obj):
         #turn foreign keys for many-to-many relations into dropdowns with the id as value 
         #and the column "name" as description
@@ -158,8 +159,8 @@ def get_fields(obj,orm):
         fields[fname]=form.Dropdown(
                         attr.key,
                         [(v.id, str(v)) for v in values],
-                        post="<a class='addlink' href='/%s/new'>Add %s</a>"%(fname,fname),
-                        **{'multiple':True,'data-values_url':'/%s/'%fname})
+                        post="<a class='addlink' href='%s/new'>Add %s</a>"%(fname,fname),
+                        **{'multiple':True,'data-values_url':'%s/'%fname})
     for c in get_simple_columns(obj):
         fields[c.name]=map_column_type(c)
 

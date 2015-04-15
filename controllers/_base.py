@@ -5,7 +5,7 @@ from util import get_values, parse_accept, get_colnames, get_simple_columns
 import json
 import logging as log
 
-render = web.template.render('templates/')
+render = web.template.render('templates/',globals={'url':web.url})
 
 
 class BaseListController:

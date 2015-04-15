@@ -36,16 +36,6 @@ render = web.template.render('templates/')
 
 class new:
     def GET(self):
-        global app
-        dataset = web.input().dataset
-        dataset = getattr(model,dataset)
-        for obj in dataset.tables:
-            application = getApplication(obj)
-            name=obj.__name__.lower()
-            if "/%s"%name in dict(app.mapping).keys():
-                index=app.mapping.index(('/%s'%name,dict(app.mapping)['/%s'%name]))
-                del(app.mapping[index])
-            app.add_mapping("/%s"%name,application)
         return render.new()
 
 class index:
@@ -53,16 +43,23 @@ class index:
         datasets = [d.__name__.split('.')[-1] for d in model.datasets]
         return render.index(datasets)
 
-urls = (
-    "/", index,
-    "/new", new,
-#    "/site", site.app,
-#    "/sample", sample.app,
-#    "/observation", observation.app,
-#    "/observer", observer.app,
-#    "/species", species.app
-)
-app = web.application(urls, globals(),autoreload=False)
+urls = [
+    "/", index
+]
+
+for dataset in [d.__name__.split('.')[-1] for d in model.datasets]:
+    ds_urls = ["/new",new]
+    for obj in getattr(model,dataset).tables:
+        application = getApplication(obj)
+        name = obj.__name__.lower()
+        ds_urls += ["/%s"%name,application]
+    ds_app = web.application(tuple(ds_urls), locals(), autoreload=False)
+    print("adding application for dataset %s with urls %s"%(dataset,ds_urls))
+    urls.append("/%s"%dataset)
+    urls.append(ds_app)
+
+app = web.application(tuple(urls), globals(),autoreload=False)
+print(app.mapping)
 app.add_processor(load_sqla)
 
 if __name__ == "__main__":

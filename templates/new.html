@@ -33,6 +33,9 @@ function updateSelect(obj){
     select.select2({data:data2});
     if (select.attr('multiple')=='multiple'){
       val=select.val()
+      if (val == null){
+        val = []
+      }
       val.push(data2.last().id)
     }
     else{
@@ -111,7 +114,7 @@ formContainer.prototype.render = function(params){
 }
 
 var ObservationList = function(){
-  this.url='/observation/'
+  this.url='observation/'
   formContainer.call(this, id='ObservationList', classes=['list']);
 }
 ObservationList.prototype = Object.create(formContainer.prototype);
@@ -124,7 +127,7 @@ ObservationList.prototype.render = function(){
 }
 
 var ObservationForm = function(){
-  this.url='/observation/new';
+  this.url='observation/new';
   formContainer.call(this, id='observationForm', classes=[]);
 }
 ObservationForm.prototype = Object.create(formContainer.prototype);
@@ -190,7 +193,7 @@ ObservationForm.prototype.setAjaxForm = function(){
 
 
 var SampleForm = function(){
-  this.url='/sample/new';
+  this.url='sample/new';
   formContainer.call(this, id='sampleForm', classes=[]);
 }
 SampleForm.prototype = Object.create(formContainer.prototype);

@@ -19,7 +19,7 @@ if (!Array.prototype.last){
 };
 jQuery(document).ready(function(){
   jQuery("#dataset").change(function(e){
-    url='/new?'+jQuery.param({dataset:jQuery(this).val()}) 
+    url=jQuery(this).val()+'/new' 
     console.log('redirecting to '+url);
     window.location.replace(url);
   });

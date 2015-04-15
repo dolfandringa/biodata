@@ -8,11 +8,13 @@ $def with (instances,fields)
   <div class="headerrow">
     $for k in fields:
       <span class='headerfield $k'>$k</span>
+    <span class='headerfield'>&nbsp;</span>
   </div>
   $for i,inst in enumerate(instances):
     <div class='datarow $ ["even","odd"][i%2]'>
       $for k in fields:
         <span class="datafield $k">$(inst[k] or '')</span>
+    <span class="datafield deletelink"><a href='$:url("/delete")?id=$(inst["id"])'>delete</a></span>
     </div>
 </body>
 </html>

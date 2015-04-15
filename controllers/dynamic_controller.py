@@ -3,17 +3,9 @@ from web import form
 from _base import BaseController, BaseShowController, BaseListController
 
 
-render = web.template.render('templates/')
-
 def getApplication(orm_cls):
-    urls = (
-        "/", "list",
-        "/new", "new",
-        "/(.+)", "show"
-    )
 
-
-    class list(BaseListController):
+    class lst(BaseListController):
         ORM_CLS = orm_cls
 
 
@@ -25,5 +17,11 @@ def getApplication(orm_cls):
         ID = orm_cls.__name__.lower()
         TITLE = 'New %s'%orm_cls.__name__
         ORM_CLS = orm_cls
+
+    urls = (
+        "/", lst,
+        "/new", new,
+        "/(.+)", show
+    )
 
     return web.application(urls, locals())
