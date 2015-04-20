@@ -17,11 +17,14 @@ input{
 
 .datafield, .headerfield{
   margin-left: 10px;
-  width: 120px;
+  width: 110px;
   display: inline-block;
 }
+.datafield{
+  font-size: 0.9em;
+}
 .headerfield{
-  font-size: 1.2em;
+  font-size: 1.0em;
   font-weight: bold;
 }
 #observationForm table{
