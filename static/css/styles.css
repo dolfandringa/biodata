@@ -49,7 +49,11 @@ form[name='form_observation'] table td{
 }
 #observationList .headerrow span.species,
 #observationList .datarow span.species{
-  width: 100px;
+  width: 120px;
+}
+#observationList .headerrow span.observer,
+#observationList .datarow span.observer{
+  width: 90px;
 }
 #observationList .headerrow span.deletelink,
 #observationList .datarow span.deletelink{
