@@ -69,9 +69,27 @@ form[name='form_observation'] table td{
 .list .datarow.even{
   background-color: white;
 }
-
+.modalForm .content{
+  width: 80%;
+  margin: 15% auto;
+  text-align: center;
+}
+.modalForm .content .icon{
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  /*float: left;*/
+  margin-right: 10px;
+}
+.modalForm .content .message{
+  line-height: 20px;
+  /*float: left;*/
+}
 .modalForm iframe{
   width: 95%;
   height: 95%;
   border: none;
+}
+.no-close .ui-dialog-titlebar-close {
+  display: none;
 }
