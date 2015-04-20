@@ -1,6 +1,7 @@
 import web
 from web import form
 from _base import BaseController, BaseShowController, BaseListController
+from _base import BaseDeleteController
 
 
 def getApplication(orm_cls):
@@ -13,6 +14,10 @@ def getApplication(orm_cls):
         ORM_CLS = orm_cls
 
 
+    class deletectl(BaseDeleteController):
+        ORM_CLS = orm_cls
+
+
     class new(BaseController):
         ID = orm_cls.__name__.lower()
         TITLE = 'New %s'%orm_cls.__name__
@@ -21,7 +26,8 @@ def getApplication(orm_cls):
     urls = (
         "/", lst,
         "/new", new,
-        "/(.+)", show
+        "/([0-9]+)", show,
+        "/delete", deletectl
     )
 
     return web.application(urls, locals())

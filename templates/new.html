@@ -17,6 +17,8 @@ if (!Array.prototype.last){
     };
 };
 
+var temp;
+
 function updateSelect(obj){
   select=obj.find('select')
   url=select.attr('data-values_url')
@@ -71,7 +73,35 @@ function cleanupModalForm(dialog,container){
   });
 }
 
+function openWaitDialog(message){
+  dialog=jQuery("<div class='modalForm'>" +message+"</div>");
+  jQuery('body').append(dialog);
+  dialog = dialog.dialog({
+    autoOpen: false,
+    width: 400,
+    height: 200,
+    modal: true
+  });
+  dialog.dialog("open");
+  return dialog;
+}
+
+function closeWaitDialog(dialog,message){
+  if(message != undefined){
+    dialog.html(message);
+    waittime=3000;
+  }
+  else{
+    waittime = 1;
+  }
+  setTimeout(function(){
+    dialog.dialog("close");
+    dialog.remove();
+  },waittime);
+}
+
 function setModalLinks(container){
+  temp = container;
   obj=container.container;
   obj.find('a.addlink').click(function(e){
     container=jQuery(this).parent()
@@ -95,6 +125,20 @@ function setModalLinks(container){
     });
     return false;
   });
+  obj.find('a.deletelink').click(function(e){
+    console.log(jQuery(this));
+    url=jQuery(this).attr('href')
+    dialog=openWaitDialog('Just a moment please.')
+    jQuery.get(url,function(){
+      closeWaitDialog(dialog);
+      sampleid=samForm.container.find("input[name='id']").val();
+      if(sampleid!=undefined){
+            obsList.render({sample_id:sampleid})
+      }
+    });
+    return false;
+  });
+
 }
 
 var formContainer = function (id,classes) {
@@ -123,6 +167,7 @@ ObservationList.prototype.render = function(){
   formContainer.prototype.render.apply(this,arguments)
   jQuery.ajax({method:'get',url:this.url+'?'+jQuery.param(this.params),context:this,success:function(data){
     this.container.html(data)
+    setModalLinks(this)
   }});
 }
 

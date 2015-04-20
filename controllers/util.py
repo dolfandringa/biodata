@@ -171,4 +171,5 @@ def get_fields(obj,orm):
             args=v.get('args',[])
             kwargs=v.get('kwargs',{})
             fields[k]=v['widget'](k,*args,**kwargs)
+    fields.values()[0].attrs['autoFocus']=True
     return fields

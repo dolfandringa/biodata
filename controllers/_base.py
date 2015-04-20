@@ -8,6 +8,15 @@ import logging as log
 render = web.template.render('templates/',globals={'url':web.url})
 
 
+class BaseDeleteController:
+    def GET(self):
+        id = web.input()['id']
+        inst = web.ctx.orm.query(self.__class__.ORM_CLS).get(id)
+        web.ctx.orm.delete(inst)
+        del inst
+        return json.dumps({'success':True})
+
+
 class BaseListController:
     def GET(self):
         web.ctx.orm.flush()

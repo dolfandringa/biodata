@@ -17,7 +17,7 @@ input{
 
 .datafield, .headerfield{
   margin-left: 10px;
-  min-width: 100px;
+  width: 120px;
   display: inline-block;
 }
 .headerfield{
@@ -27,6 +27,9 @@ input{
 #observationForm table{
   display: block;
   overflow: visible;
+}
+.select2-container{
+  min-width: 150px;
 }
 form[name='form_observation'] table tr{
   display: inline-block;
@@ -42,13 +45,23 @@ form[name='form_observation'] table td{
 
 #observationList .headerrow span.sample,
 #observationList .datarow span.sample{
-  min-width: 350px;
+  width: 150px;
+}
+#observationList .headerrow span.species,
+#observationList .datarow span.species{
+  width: 100px;
+}
+#observationList .headerrow span.deletelink,
+#observationList .datarow span.deletelink{
+  width: 60px;
 }
 .list .headerrow,
 .list .datarow
 {
   margin-top: 5px;
   padding: 2px 0px;
+  height: 40px;
+  vertical-align: top;
 }
 .list .datarow.odd{
   background-color: lightgrey;
