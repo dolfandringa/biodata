@@ -17,14 +17,14 @@ input{
 
 .datafield, .headerfield{
   margin-left: 10px;
-  width: 110px;
+  width: 100px;
   display: inline-block;
 }
 .datafield{
   font-size: 0.9em;
 }
 .headerfield{
-  font-size: 1.0em;
+  font-size: 0.9em;
   font-weight: bold;
 }
 #observationForm table{
@@ -56,7 +56,7 @@ form[name='form_observation'] table td{
 }
 #observationList .headerrow span.observer,
 #observationList .datarow span.observer{
-  width: 90px;
+  width: 120px;
 }
 #observationList .headerrow span.deletelink,
 #observationList .datarow span.deletelink{
