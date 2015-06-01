@@ -32,7 +32,7 @@ class BaseSample(Base):
     formfields['dataset'] = {'skip':True}
 
     def __str__(self):
-        return "Sample %s on %s %s at %s"%(self.id,self.date,self.time or '',self.site.name)
+        return "%s at %s"%(self.id,self.site.name)
 
 
 class BaseObserver(Base):
