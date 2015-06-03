@@ -81,21 +81,30 @@ class BaseController:
             return render.form(f,ID,TITLE,web.url())
         else:
             #The form validated. Store the values in the db
-            inst = obj()
+            values = []
             for col in get_simple_columns(obj):
                 #set the simple column values
-                setattr(inst,col.name,f[col.name].value or None)
+                values.append((col.name,f[col.name].value or None))
             for attr in get_relation_attributes(obj):
                 #get the relation attributes and set them.
                 target = attr.property.mapper.entity #target class
                 pkey = f[attr.key].value #primary key value from the form
                 val = orm.query(target).get(pkey) #get target instance from pkey
-                setattr(inst,attr.key,val)
+                values.append((attr.key,val))
             for attr in get_multi_relation_attributes(obj):
                 target = attr.property.mapper.entity #target class
+                vals=[]
                 for v in f[attr.key].value:
                     val = orm.query(target).get(v) #get target instance from pkey
-                    getattr(inst,attr.key).append(val)
+                    vals.append(val)
+                values.append((attr.key,vals))
+            inst = obj()
+            for k,v in values:
+                if isinstance(v,list):
+                    for val in v:
+                        getattr(inst,k).append(val)
+                else:
+                    setattr(inst,k,v)
             orm.add(inst)
             orm.commit()
             log.debug('changes committed')
