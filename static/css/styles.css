@@ -46,6 +46,9 @@ form[name='form_observation'] table td{
   margin: 5px 0px;
 }
 
+#sampleForm .datafield{
+  width: 200px;
+}
 #observationList .headerrow span.sample,
 #observationList .datarow span.sample{
   width: 150px;
