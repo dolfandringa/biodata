@@ -2,12 +2,13 @@ from sqlalchemy import create_engine
 from configparser import SafeConfigParser
 import rvc_species
 import random_swim_species
+import clams
 config=SafeConfigParser()
 config.read('settings.cfg')
 uri=config.get('database','uri')
 engine = create_engine(uri)
 
-datasets = [rvc_species, random_swim_species]
+datasets = [rvc_species, random_swim_species, clams]
 
 if __name__ == "__main__":
     from sqlalchemy.ext.declarative import declarative_base

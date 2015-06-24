@@ -4,6 +4,7 @@ from web import form
 from sqlalchemy import types as sa_types
 from sqlalchemy.orm.properties import RelationshipProperty, ColumnProperty
 from collections import OrderedDict
+import decimal
 
 
 def parse_accept(header):
@@ -41,6 +42,21 @@ def is_int_date(v):
     except ValueError:
         return False
 
+def is_decimal(v):
+    print('checking decimal value %s'%v)
+    try:
+        decimal.Decimal(v)
+        return True
+    except ValueError:
+        return False
+
+def is_int_time(v):
+    print('checking time value %s'%v)
+    try:
+        datetime.datetime.strptime(v,'%H:%M')
+        return True
+    except ValueError:
+        return False
 
 __type_map = {
     sa_types.Integer: {
@@ -49,6 +65,15 @@ __type_map = {
             form.Validator(
                 'Please enter a whole number (no decimals)',
                 lambda v: form.utils.intget(v,None) != None
+            )
+        ]
+    },
+    sa_types.Numeric: {
+        'widget':form.Textbox,
+        'args':[
+            form.Validator(
+                'Please enter a number (with . as decimal separator)',
+                is_decimal
             )
         ]
     },
@@ -61,7 +86,11 @@ __type_map = {
         'args':[form.Validator(
             'Not a valid date format.',
             is_int_date)]},
-    sa_types.Time: {'widget':form.Textbox}
+    sa_types.Time: {'widget':form.Textbox,
+                    'kwargs':{'post':" format: HH:MM"},
+                    'args':[form.Validator(
+                        'Not a valid time format.',
+                        is_int_time)]},
 }
 
 def map_column_type(c):
@@ -70,7 +99,7 @@ def map_column_type(c):
     if not c.nullable:
         args.append(form.notnull)
     kwargs=field.get('kwargs',{})
-    return field['widget'](c.name,*args,**kwargs)
+    return {'widget':field['widget'],'name':c.name,'args':args,'kwargs':kwargs}
 
 
 def get_data_attributes(obj):
@@ -144,11 +173,11 @@ def get_fields(obj,orm):
         target = attr.property.mapper.entity
         values = orm.query(target).all()
         fname = getattr(target,'pretty_name',attr.key)
-        fields[fname]=form.Dropdown(
-                        fname,
-                        [(v.id, str(v)) for v in values],
-                        post="<a class='addlink' href='%s/new'>Add %s</a>"%(fname,fname),
-                        **{'data-values_url':'%s/'%fname})
+        fields[fname]={ 'widget':form.Dropdown,
+                        'name':fname,
+                        'args':[[(v.id, str(v)) for v in values]],
+                        'kwargs':{'post':"<a class='addlink' href='%s/new'>Add %s</a>"%(fname,fname),
+                                  'data-values_url':'%s/'%fname}}
     for attr in get_multi_relation_attributes(obj):
         #turn foreign keys for many-to-many relations into dropdowns with the id as value 
         #and the column "name" as description
@@ -156,20 +185,32 @@ def get_fields(obj,orm):
         target = attr.property.mapper.entity
         values = orm.query(target).all()
         fname = getattr(target,'pretty_name',target.__name__)
-        fields[fname]=form.Dropdown(
-                        attr.key,
-                        [(v.id, str(v)) for v in values],
-                        post="<a class='addlink' href='%s/new'>Add %s</a>"%(fname,fname),
-                        **{'multiple':True,'data-values_url':'%s/'%fname})
+        fields[fname]={ 'widget':form.Dropdown,
+                        'name':attr.key,
+                        'args':[[(v.id, str(v)) for v in values]],
+                        'kwargs':{'post':"<a class='addlink' href='%s/new'>Add %s</a>"%(fname,fname),
+                                  'multiple':True,
+                                  'data-values_url':'%s/'%fname}}
     for c in get_simple_columns(obj):
+        #map the form widgets by the SQLAlchemy column type
         fields[c.name]=map_column_type(c)
 
     if hasattr(obj,'formfields'):
+        #adjust the widgets by the arguments defined in the model
         for k,v in obj.formfields.items():
+            field = fields.get(k,{})
             if v.get('skip',False) == True:
                 continue
-            args=v.get('args',[])
-            kwargs=v.get('kwargs',{})
-            fields[k]=v['widget'](k,*args,**kwargs)
+            args = v.get('args',field.get('args',[]))
+            kwargs = field.get('kwargs',{})
+            kwargs.update(v.get('kwargs',{}))
+            widget = v.get('widget',field.get('widget'))
+            fields[k] = {'name':k,'widget':widget,'args':args,'kwargs':kwargs}
+
+    for k,v in fields.items():
+        #instantiate the widgets
+        print ("k: %s v:%s"%(k,v))
+        fields[k]=v['widget'](v['name'],*v['args'],**v['kwargs'])
     fields.values()[0].attrs['autoFocus']=True
+
     return fields
