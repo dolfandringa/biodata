@@ -1,10 +1,16 @@
 from sqlalchemy import create_engine
 from configparser import SafeConfigParser
+import os
+
+config=SafeConfigParser()
+curdir = os.path.abspath(os.path.dirname(__file__))
+settings_file=os.path.join(curdir,'..','settings.cfg')
+
 import rvc_species
 import random_swim_species
 import clams
-config=SafeConfigParser()
-config.read('settings.cfg')
+
+config.read(settings_file)
 uri=config.get('database','uri')
 engine = create_engine(uri)
 
