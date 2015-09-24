@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, Unicode, Table, Date, Time
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-class Species_Group(Base):
+class SpeciesGroup(Base):
     __tablename__ = 'rvc_species_speciesgroup'
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, nullable=False)
@@ -16,8 +16,8 @@ class Sample(BaseSample):
     __tablename__ = 'rvc_species_sample'
     __mapper_args__ = {'polymorphic_identity':'rvc_species'}
     id = Column(Integer,ForeignKey('base_sample.id'),primary_key=True)
-    species_group_id = Column(Integer, ForeignKey('rvc_species_speciesgroup.id'), nullable=False)
-    species_group = relationship('Species_Group', backref='samples')
+    speciesgroup_id = Column(Integer, ForeignKey('rvc_species_speciesgroup.id'), nullable=False)
+    speciesgroup = relationship('SpeciesGroup', backref='samples')
 
 class Observer(BaseObserver):
     __tablename__ = 'rvc_species_observer'
@@ -46,4 +46,4 @@ class Observation(BaseObservation):
     score_30_39 = Column(Integer)
     score_40_49 = Column(Integer)
 
-tables = (Sample, Observer, Observation, Species, Site, Species_Group)
+tables = (Sample, Observer, Observation, Species, Site, SpeciesGroup)
