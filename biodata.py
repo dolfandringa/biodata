@@ -48,8 +48,10 @@ urls = [
 ]
 
 for dataset in [d.__name__.split('.')[-1] for d in model.datasets]:
-    ds_urls = ["/new",new]
+    #loop over the different datasets in the SQLAlchemy     model
+    ds_urls = ["/new",new] #create a "new" controller with a standard form
     for obj in getattr(model,dataset).tables:
+        #for each table in the SQLAlchemy model, create a subapplication defining basic CRUD operations
         application = getApplication(obj)
         name = obj.__name__.lower()
         ds_urls += ["/%s"%name,application]

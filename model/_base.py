@@ -19,7 +19,7 @@ class BaseSample(Base):
     formfields = {}
     id = Column(Integer, primary_key=True)
     date = Column(Date, nullable=False)
-    time = Column(Time)
+    time = Column(Time, nullable=True)
     site_id = Column(Integer, ForeignKey('base_site.id'), nullable=False)
     site = relationship("BaseSite", backref="samples")
     dataset = Column(Unicode)

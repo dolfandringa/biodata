@@ -98,6 +98,7 @@ __type_map = {
 def map_column_type(c):
     field =  __type_map.get(c.type.__class__)
     args=field.get('args',[])
+    
     if not c.nullable:
         args.append(form.notnull)
     kwargs=field.get('kwargs',{})

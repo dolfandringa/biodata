@@ -3,6 +3,7 @@ from _base import BaseSite, BaseSpecies, BaseObserver
 from sqlalchemy import Column, Integer, String, Unicode, Table, Date, Time, Numeric
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
+import copy
 
 class Sample(BaseSample):
     __tablename__ = 'clams_sample'
@@ -31,8 +32,10 @@ class Observation(BaseObservation):
     depth = Column(Numeric)
     size = Column(Integer)
     time = Column(Time)
-    BaseObservation.formfields['size']={'kwargs':{'post':" size in whole cm"}}
-    BaseObservation.formfields['depth']={'kwargs':{'post':" depth in m (with decimal numbers)"}}
+    #deepcopy the formfields so we are not altering the mutable for other BaseObservation instances
+    formfields = copy.deepcopy(BaseObservation.formfields)
+    formfields['size']={'kwargs':{'post':" size in whole cm"}}
+    formfields['depth']={'kwargs':{'post':" depth in m (with decimal numbers)"}}
     species_id = Column(Integer, ForeignKey("clams_species.id"))
     species = relationship("model.clams.Species", backref="observations")
 
