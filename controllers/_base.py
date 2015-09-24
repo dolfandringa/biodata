@@ -25,8 +25,8 @@ class BaseListController:
             instances = web.ctx.orm.query(self.__class__.ORM_CLS).filter_by(**params).all()
         else:
             instances = web.ctx.orm.query(self.__class__.ORM_CLS).all()
-        accept = parse_accept(web.ctx.env['HTTP_ACCEPT'])
-        if accept[0]['media_type']=='application/json':
+        accept = parse_accept(web.ctx.env.get('HTTP_ACCEPT',None))
+        if accept and accept[0]['media_type']=='application/json':
             return json.dumps([(s.id,str(s)) for s in instances])
         else:
             return render.instance_list([get_values(i) for i in instances],get_colnames(self.__class__.ORM_CLS))

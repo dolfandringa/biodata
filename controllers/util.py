@@ -12,6 +12,8 @@ def parse_accept(header):
         >>> parse_accept("text/plain; q=0.5, text/html")
         [{'media_type': 'text/html'}, {'q': 0.5, 'media_type': 'text/plain'}]
     """
+    if header == None:
+        return None
     result= []
     for media_range in header.split(','):
         parts = media_range.split(';')
