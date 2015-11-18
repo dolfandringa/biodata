@@ -10,6 +10,7 @@ import os, sys
 
 curdir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(curdir,'..'))
+#print("PYTHONPATH: %s"%sys.path)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

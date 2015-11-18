@@ -1,10 +1,10 @@
-$def with (instances,fields)
+$def with (name,instances,fields)
 <html>
 <head>
-<title>Observations</title>
+<title>$(name)</title>
 <link href="/static/css/styles.css" rel="stylesheet" />
 </head>
-<body id='observationList' class='list'>
+<body id='$(name)List' class='list'>
   <div class="headerrow">
     $for k in fields:
       <span class='headerfield $k'>$k</span>
@@ -14,6 +14,7 @@ $def with (instances,fields)
     <div class='datarow $ ["even","odd"][i%2]'>
       $for k in fields:
         <span class="datafield $k">$(inst[k] or '')</span>
+    <span class="datafield editlink"><a class="editlink" href='$:url("/edit")?id=$(inst["id"])'>edit</a></span>
     <span class="datafield deletelink"><a class="deletelink" href='$:url("/delete")?id=$(inst["id"])'>delete</a></span>
     </div>
 </body>

@@ -1,14 +1,19 @@
 from web import form
 import web
-from util import get_fields, get_relation_attributes, get_multi_relation_attributes
+
+from util import get_fields, get_relation_attributes
+from util import get_multi_relation_attributes
 from util import get_values, parse_accept, get_colnames, get_simple_columns
+from util import get_primary_keys
 import json
 import logging as log
+from collections import OrderedDict
 
 render = web.template.render('templates/',globals={'url':web.url})
 
 
 class BaseDeleteController:
+    
     def GET(self):
         id = web.input()['id']
         inst = web.ctx.orm.query(self.__class__.ORM_CLS).get(id)
@@ -21,6 +26,7 @@ class BaseListController:
     def GET(self):
         web.ctx.orm.flush()
         params = web.input()
+        name = self.__class__.ORM_CLS.__name__
         if params:
             instances = web.ctx.orm.query(self.__class__.ORM_CLS).filter_by(**params).all()
         else:
@@ -29,7 +35,7 @@ class BaseListController:
         if accept and accept[0]['media_type']=='application/json':
             return json.dumps([(s.id,str(s)) for s in instances])
         else:
-            return render.instance_list([get_values(i) for i in instances],get_colnames(self.__class__.ORM_CLS))
+            return render.instance_list(name,[get_values(i) for i in instances],get_colnames(self.__class__.ORM_CLS))
 
 
 class BaseShowController:
@@ -54,15 +60,27 @@ class BaseController:
     def get_form(self,obj,orm):
         fields=get_fields(obj,orm).values()
         redirf=form.Hidden(name='redirect',value='list')
+        for pkey in get_primary_keys(obj):
+            fields.append(form.Hidden(name=pkey))
         fields.append(redirf)
         f = form.Form(*fields)()
         defaults=dict([(i.name,i.value) for i in f.inputs])
         source={}
-        for k,v in web.input().items():
-            #convert integers to int values
-            v=form.utils.intget(v) or v
+        listinputs={}
+        for field in fields:
+            if isinstance(field,form.Dropdown) and field.attrs.get('multiple',False)==True:
+                listinputs[field.name]=[]
+        for k,v in web.input(**listinputs).items():
+            #correct the values passed to the form
+            if isinstance(v,list):
+                #convert integers in a list of values to int values
+                v=[form.utils.intget(v2) or v2 for v2 in v]
+            else:
+                #convert integers to int values
+                v=form.utils.intget(v) or v
             source[k]=v
         defaults.update(source)
+        print(defaults)
         f.fill(source=defaults)
         return f
 
@@ -82,6 +100,9 @@ class BaseController:
         else:
             #The form validated. Store the values in the db
             values = []
+            pkeys = get_primary_keys(obj)
+            for pkey in pkeys:
+                values.append((pkey,f[pkey].value or None))
             for col in get_simple_columns(obj):
                 #set the simple column values
                 values.append((col.name,f[col.name].value or None))
@@ -98,9 +119,17 @@ class BaseController:
                     val = orm.query(target).get(v) #get target instance from pkey
                     vals.append(val)
                 values.append((attr.key,vals))
-            inst = obj()
-            for k,v in values:
+            values = OrderedDict(values)
+            if all([pkey in values.keys() for pkey in pkeys]):
+                #check if (all) primary keys have been defined,
+                #if so, fetch the instance from the database.
+                inst = orm.query(obj).get(tuple([values.get(pkey) for pkey in pkeys]))
+            else:
+                #if not, create a new instance
+                inst = obj()
+            for k,v in values.items():
                 if isinstance(v,list):
+                    setattr(inst,k,[]) #empty the list first
                     for val in v:
                         getattr(inst,k).append(val)
                 else:

@@ -5,6 +5,7 @@ os.chdir(curdir)
 sys.path.append(curdir)
 
 import web
+from flask import Flask
 from controllers import sample
 from controllers.dynamic_controller import getApplication
 from sqlalchemy.orm import scoped_session, sessionmaker

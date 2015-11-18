@@ -17,8 +17,19 @@ input{
 
 .datafield, .headerfield{
   margin-left: 10px;
-  width: 100px;
+  width: 200px;
   display: inline-block;
+}
+.datafield.date, .headerfield.date,
+.datafield.time, .headerfield.time{
+  width: 100px;
+}
+
+.datafield.deletelink, .headerfield.deletelink{
+  width: 75px;
+}
+.datafield.speciesgroup, .headerfield.speciesgroup{
+  width: 350px;
 }
 .datafield{
   font-size: 0.9em;
@@ -49,20 +60,21 @@ form[name='form_observation'] table td{
 #sampleForm .datafield{
   width: 200px;
 }
-#observationList .headerrow span.sample,
-#observationList .datarow span.sample{
+
+#ObservationList .headerrow span.sample,
+#ObservationList .datarow span.sample{
   width: 150px;
 }
-#observationList .headerrow span.species,
-#observationList .datarow span.species{
+#ObservationList .headerrow span.species,
+#ObservationList .datarow span.species{
   width: 120px;
 }
-#observationList .headerrow span.observer,
-#observationList .datarow span.observer{
+#ObservationList .headerrow span.observer,
+#ObservationList .datarow span.observer{
   width: 120px;
 }
-#observationList .headerrow span.deletelink,
-#observationList .datarow span.deletelink{
+#ObservationList .headerrow span.deletelink,
+#ObservationList .datarow span.deletelink{
   width: 60px;
 }
 .list .headerrow,

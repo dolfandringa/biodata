@@ -3,9 +3,10 @@ from sqlalchemy import ForeignKey, UnicodeText
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from collections import OrderedDict
-from web import form
+import wtforms
+from biodata import db
 
-Base = declarative_base()
+Base = db.Model
 
 sample_participants = Table("sample_participants",Base.metadata,
     Column("sample_id", Integer, ForeignKey("base_sample.id")),
@@ -59,7 +60,7 @@ class BaseObservation(Base):
     observer_id = Column(Integer, ForeignKey("base_observer.id"))
     sample_id = Column(Integer, ForeignKey("base_sample.id"))
     sample = relationship("BaseSample", backref="observations")
-    formfields['sample']={  'widget':form.Hidden,
+    formfields['sample']={  'widget':wtforms.HiddenField,
                             'valuefunc':lambda x: x.sample.id,
                             'args':[],
                             'kwargs':{}}
