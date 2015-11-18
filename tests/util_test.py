@@ -1,22 +1,25 @@
 from base_tests import _BaseDBTest, _BaseTest
 import biodata
-from biodata.util import *
 from biodata import model
+from biodata.util import *
 from wtforms import ValidationError, Form, StringField
 from wtforms.validators import InputRequired
 import tempfile
 import os
 from sqlalchemy import Column, Integer, String, Unicode, Table, Date, Time
 from sqlalchemy import ForeignKey, UnicodeText
+from sqlalchemy.orm import relationship, declarative_base
 import types
 
-class Sample(biodata.db.Model):
-    __tablename__ = 'test'
+Base = declarative_base()
+
+class TestSample(Base):
+    __tablename__ = 'testsampe'
     id = Column(Integer, primary_key=True)
     date = Column(Date, nullable=False)
     time = Column(Time, nullable=True)
     name = Column(Unicode, nullable=False)
-    
+
 
 def isint(v):
     try:
@@ -55,19 +58,19 @@ class UtilTest(_BaseTest):
         """
         Tests the mapping of column types.
         """
-        type = map_column_type(Sample.id)
+        type = map_column_type(TestSample.id)
         self.assertEqual(type['label'],'id')
         self.assertEqual(type['widget'],wtforms.IntegerField)
-        type = map_column_type(Sample.date)
+        type = map_column_type(TestSample.date)
         self.assertEqual(type['label'],'date')
         self.assertEqual(type['widget'],wtforms.DateField)
         self.assertEqual(type['kwargs']['format'],'%Y-%m-%d')
         self.assertIsInstance(type['args'][0],wtforms.validators.InputRequired)
-        type = map_column_type(Sample.time)
+        type = map_column_type(TestSample.time)
         self.assertEqual(type['label'],'time')
         self.assertEqual(type['widget'],wtforms.DateTimeField)
         self.assertEqual(type['kwargs']['format'],'%H:%M')
-        type = map_column_type(Sample.name)
+        type = map_column_type(TestSample.name)
         self.assertEqual(type['label'],'name')
         self.assertEqual(type['widget'],wtforms.StringField)
         self.assertIsInstance(type['args'][0],wtforms.validators.InputRequired)
@@ -90,7 +93,7 @@ class UtilTestDB(_BaseDBTest):
         """
         Test fetching of sqlalchemy attributes from an SQLAlchemy class
         """
-        attrs = get_data_attributes(Sample)
+        attrs = get_data_attributes(TestSample)
         self.assertIsInstance(attrs,types.GeneratorType)
         with biodata.app.app_context():
             attrs = list(attrs)
