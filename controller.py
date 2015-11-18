@@ -14,6 +14,7 @@ def delete(self,datasetname,cls,id):
 
 @basebp.route('/<datasetname>/<clsname>/')
 def list(datasetname,clsname):
+    params = request.args
     obj = get_object(datasetname,clsname)
     if params:
             instances = g.db.session.query(obj).filter_by(**params).all()
@@ -23,10 +24,14 @@ def list(datasetname,clsname):
         return jsonify([(s.id,str(s)) for s in instances])
     else:
         retval = {
-          'values': [get_values(i) for i in instances],
-          'colnames': get_colnames(obj),
+          'instances': [get_values(i) for i in instances],
+          'fields': get_colnames(obj),
           'name': obj.__name__}
         return render_template('instance_list.html',**retval)
+
+@basebp.route("/<datasetname>/<clsname>/edit/<int:id>")
+def edit(datasetname,clsname,id):
+    pass
 
 def show():
     pass

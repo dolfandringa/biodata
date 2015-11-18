@@ -1,21 +1,24 @@
-$def with (name,instances,fields)
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>$(name)</title>
+<title>{{ name }}</title>
 <link href="/static/css/styles.css" rel="stylesheet" />
 </head>
-<body id='$(name)List' class='list'>
+<body id='{{ name }}List' class='list'>
   <div class="headerrow">
-    $for k in fields:
-      <span class='headerfield $k'>$k</span>
-    <span class='headerfield deletelink'>&nbsp;</span>
+    {% for k in fields %}
+      <span class='headerfield $k'>{{ k }}</span>
+      <span class='headerfield deletelink'>&nbsp;</span>
+    {% endfor %}
   </div>
-  $for i,inst in enumerate(instances):
-    <div class='datarow $ ["even","odd"][i%2]'>
-      $for k in fields:
-        <span class="datafield $k">$(inst[k] or '')</span>
-    <span class="datafield editlink"><a class="editlink" href='$:url("/edit")?id=$(inst["id"])'>edit</a></span>
-    <span class="datafield deletelink"><a class="deletelink" href='$:url("/delete")?id=$(inst["id"])'>delete</a></span>
-    </div>
+    {% for inst in instances %}
+        <div class='datarow {{ loop.cycle("odd","even") }}'>
+            {% for k in fields %}
+                <span class="datafield {{ k }}">{{ inst[k] or '' }}</span>
+            {% endfor %}
+            <span class="datafield editlink"><a class="editlink" href='{{ url_for("/.edit",id=inst["id"],**request.view_args) }}'>edit</a></span>
+            <span class="datafield deletelink"><a class="deletelink" href='{{ url_for("/.delete",id=inst["id"],**request.view_args) }}'>delete</a></span>
+        </div>
+    {% endfor %}
 </body>
 </html>

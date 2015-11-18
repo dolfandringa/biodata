@@ -6,6 +6,7 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.properties import RelationshipProperty, ColumnProperty
 from collections import OrderedDict
 import decimal
+from flask import request
 
 def get_object(datasetname,classname):
     """
