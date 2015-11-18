@@ -1,0 +1,36 @@
+<html>
+<head>
+<title>New Site</title>
+<script src="/static/scripts/jquery-1.11.2.min.js"></script>
+<link href="/static/css/select2.min.css" rel="stylesheet" />
+<link href="/static/css/styles.css" rel="stylesheet" />
+<link href="/static/css/jquery-ui.min.css" rel="stylesheet" />
+<link href="/static/css/jquery-ui.structure.min.css" rel="stylesheet" />
+<link href="/static/css/jquery-ui.theme.min.css" rel="stylesheet" />
+<script src="/static/scripts/jquery-ui.min.js"></script>
+<script src="/static/scripts/select2.min.js"></script>
+<script src="/static/scripts/jquery.form.js"></script>
+<script src="/static/scripts/jquery.activity-indicator-1.0.0.min.js"></script>
+</head>
+<body>
+<div>
+<form name="form_site" method="post" action="/rvc_species/site/new"> 
+<table>
+    <tr><th><label for="barangay">barangay</label></th><td><input autoFocus="True" type="text" id="barangay" name="barangay"/></td></tr>
+    <tr><th><label for="lat">lat</label></th><td><input type="text" id="lat" name="lat"/></td></tr>
+    <tr><th><label for="lon">lon</label></th><td><input type="text" id="lon" name="lon"/></td></tr>
+    <tr><th><label for="municipality">municipality</label></th><td><input type="text" id="municipality" name="municipality"/></td></tr>
+    <tr><th><label for="name">name</label></th><td><input type="text" id="name" name="name"/></td></tr>
+    <tr style="display: none;"><th></th><td><input type="hidden" id="redirect" value="list" name="redirect"/></td></tr>
+</table>
+</form>
+<button name="save" onclick="alert('test');jQuery('form[name=form_site]').submit()">Save</button>
+<button name="save_new" onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_site]').submit();">Save and New</button>
+<script type='text/javascript'>
+  jQuery(document).ready(function(){
+    jQuery("form[name=form_site] select").select2();
+  });
+</script>
+</div>
+</body>
+</html>

@@ -1,4 +1,5 @@
 from base_tests import _BaseDBTest, _BaseTest
+import datetime
 import biodata
 from biodata import model
 from biodata.util import *
@@ -6,20 +7,9 @@ from wtforms import ValidationError, Form, StringField
 from wtforms.validators import InputRequired
 import tempfile
 import os
-from sqlalchemy import Column, Integer, String, Unicode, Table, Date, Time
-from sqlalchemy import ForeignKey, UnicodeText
-from sqlalchemy.orm import relationship, declarative_base
+from testmodel import TestSample, TestObservation, TestParticipant
+
 import types
-
-Base = declarative_base()
-
-class TestSample(Base):
-    __tablename__ = 'testsampe'
-    id = Column(Integer, primary_key=True)
-    date = Column(Date, nullable=False)
-    time = Column(Time, nullable=True)
-    name = Column(Unicode, nullable=False)
-
 
 def isint(v):
     try:
@@ -61,19 +51,23 @@ class UtilTest(_BaseTest):
         type = map_column_type(TestSample.id)
         self.assertEqual(type['label'],'id')
         self.assertEqual(type['widget'],wtforms.IntegerField)
+        self.assertEqual(type['html_attributes'],{})
         type = map_column_type(TestSample.date)
         self.assertEqual(type['label'],'date')
         self.assertEqual(type['widget'],wtforms.DateField)
         self.assertEqual(type['kwargs']['format'],'%Y-%m-%d')
+        self.assertEqual(type['html_attributes'],{})
         self.assertIsInstance(type['args'][0],wtforms.validators.InputRequired)
         type = map_column_type(TestSample.time)
         self.assertEqual(type['label'],'time')
         self.assertEqual(type['widget'],wtforms.DateTimeField)
         self.assertEqual(type['kwargs']['format'],'%H:%M')
+        self.assertEqual(type['html_attributes'],{})
         type = map_column_type(TestSample.name)
         self.assertEqual(type['label'],'name')
         self.assertEqual(type['widget'],wtforms.StringField)
-        self.assertIsInstance(type['args'][0],wtforms.validators.InputRequired)
+        self.assertEqual(type['html_attributes'],{})
+        self.assertIsInstance(type['args'][0],wtforms.validators.InputRequired)    
         
     def test_get_object(self):
         """
@@ -82,22 +76,89 @@ class UtilTest(_BaseTest):
         """
         obj = get_object('rvc_species','sample')
         self.assertEquals(obj, model.rvc_species.Sample)
+    
+    def test_get_simple_columns(self):
+        cols = list(get_simple_columns(TestSample))
+        self.assertEqual(len(cols), 3)
+        expected = set([u'date',u'time',u'name'])
+        self.assertEqual(set([c.key for c in cols]),expected)
+    
+    def test_get_relation_attributes(self):
+        cols = list(get_relation_attributes(TestObservation))
+        self.assertEqual(len(cols), 1)
+        self.assertEqual([c.key for c in cols],[u'sample'])
+        cols = list(get_relation_attributes(TestSample))
+        self.assertEqual(len(cols), 0)
+    
+    def test_get_multi_relation_attributes(self):
+        cols = list(get_multi_relation_attributes(TestSample))
+        self.assertEqual(len(cols), 1)
+        self.assertEqual([c.key for c in cols],[u'participants'])
+    
+    def test_get_data_attributes(self):
+        """
+        Test fetching of sqlalchemy attributes from an SQLAlchemy class
+        """
+        #Do the attributes with relations first, as the referred objects won't 
+        #have the backref attribute until the relation is loaded.
+        attrs = get_data_attributes(TestObservation)
+        self.assertIsInstance(attrs,types.GeneratorType)
+        attrs = list(attrs)
+        self.assertEqual(len(attrs),4)
+        properties = set(['id','name','sample_id','sample'])
+        self.assertEqual(set([a.key for a in attrs]),properties)
+        attrs = get_data_attributes(TestParticipant)
+        attrs = list(attrs)
+        self.assertEqual(len(attrs),3)
+        properties = set(['testsamples','id','name'])
+        self.assertEqual(set([a.key for a in attrs]),properties)
+        attrs = get_data_attributes(TestSample)
+        attrs = list(attrs)
+        self.assertEqual(len(attrs),6)
+        properties = set(['id','date','time','name',
+                          'observations','participants'])
+        self.assertEqual(set([a.key for a in attrs]),properties)
 
 class UtilTestDB(_BaseDBTest):
     """
     This testcase test the utility functions in biodata.util that need to read
     or write rows to/from the database and thus need an active connection.
     """
-    
-    def test_get_data_attributes(self):
+    def test_get_simple_columns(self):
         """
-        Test fetching of sqlalchemy attributes from an SQLAlchemy class
+        Test if the get_simple_columns also works with a real dataset.
         """
-        attrs = get_data_attributes(TestSample)
-        self.assertIsInstance(attrs,types.GeneratorType)
-        with biodata.app.app_context():
-            attrs = list(attrs)
-        self.assertEqual(len(attrs),4)
-        self.assertEqual(set([a.name for a in attrs]),set(['id','date','time','name']))
+        with self.app.app_context():
+            cols = list(get_simple_columns(model.rvc_species.Sample))
+            self.assertEqual(len(cols), 2)
+            expected = set([u'date',u'time'])
+            self.assertEqual(set([c.key for c in cols]),expected)
     
+    def test_get_values(self):
+        """
+        Test the biodata.util.get_values() which fetches the values for an
+        SQLAlchemy instance.
+        """
+        with self.app.app_context():
+            sample = biodata.db.session.query(model.rvc_species.Sample).get(1)
+            values = get_values(sample)
+            self.assertEqual(len(values),6)
     
+    def test_get_fields(self):
+        """
+        The mother of them all. Test if biodata.util.get_fields results in the
+        correct loading of the wtforms fields for each SQLAlchemy column.
+        """
+        with self.app.app_context():
+            fields = get_fields(model.rvc_species.Sample,biodata.db.session)
+            expected = set(['time','date','observer','site','speciesgroup'])
+            self.assertEqual(set(fields.keys()),expected)
+            self.assertEqual(fields['observer'].html_attributes,
+                             {'data-values_url':'observer/'})
+            self.assertEqual(fields.values()[0],fields['site'])
+            self.assertEqual(fields['site'].html_attributes,
+                             {'autoFocus':True,'data-values_url':'site/'})
+            #We can't use assertIsInstance because the fields are unbound
+            self.assertEqual(fields['site'].field_class,wtforms.SelectField)
+            self.assertEqual(fields['observer'].field_class,
+                                  wtforms.SelectMultipleField)

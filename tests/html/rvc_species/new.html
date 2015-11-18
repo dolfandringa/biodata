@@ -1,0 +1,317 @@
+<html>
+<head>
+<title>Biodata</title>
+<script src="/static/scripts/jquery-1.11.2.min.js"></script>
+<link href="/static/css/select2.min.css" rel="stylesheet" />
+<link href="/static/css/styles.css" rel="stylesheet" />
+<link href="/static/css/jquery-ui.min.css" rel="stylesheet" />
+<link href="/static/css/jquery-ui.structure.min.css" rel="stylesheet" />
+<link href="/static/css/jquery-ui.theme.min.css" rel="stylesheet" />
+<script src="/static/scripts/jquery-ui.min.js"></script>
+<script src="/static/scripts/select2.min.js"></script>
+<script src="/static/scripts/jquery.activity-indicator-1.0.0.min.js"></script>
+<script type="text/javascript">
+
+if (!Array.prototype.last){
+    Array.prototype.last = function(){
+        return this[this.length - 1];
+    };
+};
+
+var temp;
+
+function updateSelect(obj){
+  select=obj.find('select')
+  url=select.attr('data-values_url')
+  jQuery.ajax({dataType:'json',method:'get',url:url,success:function(data){
+    select=jQuery(select);
+    data2=new Array();
+    for (k in data){
+      if(data[k][0]==undefined){
+        continue;
+      }
+      data2.push({id:data[k][0],text:data[k][1]})
+    }
+    select.select2('destroy');
+    select.select2({data:data2});
+    if (select.attr('multiple')=='multiple'){
+      val=select.val()
+      if (val == null){
+        val = []
+      }
+      val.push(data2.last().id)
+    }
+    else{
+      val=data2.last().id
+    }
+    select.val(val).trigger('change');
+  }});
+}
+var temp;
+
+function cleanupModalForm(dialog,container){
+  contents=dialog.find('iframe').contents();
+  contents.find('button').remove();
+  contents.find("form").submit(function(e){
+    e.preventDefault();
+    jQuery.ajax({
+      method: "POST",
+      url: jQuery(this).attr('action'),
+      data: jQuery(this).serialize(),
+      success: function(data){
+        data=jQuery(data);
+        if(data.find('form').length==0){
+          updateSelect(container)
+          dialog.dialog("close");
+        }
+        else{
+          dialog.find('iframe').contents().children().first().html(data.children().first());
+          cleanupModalForm(dialog,container);
+        }
+      }
+    });
+    return false;
+  });
+}
+
+function openWaitDialog(message){
+  dialog=jQuery("<div class='modalForm'><div class='content'><div class='icon'></div><span class='message'>" +message+"</span></div></div>");
+  jQuery('body').append(dialog);
+  console.log(dialog.find('.icon'));
+  dialog.find('.icon').activity({segments: 8, width:4, space: 0, length: 3, color: '#0b0b0b', speed: 1.5});
+  dialog = dialog.dialog({
+    dialogClass: 'no-close',
+    autoOpen: false,
+    width: 400,
+    height: 200,
+    modal: true
+  });
+  dialog.dialog("open");
+  return dialog;
+}
+
+function closeWaitDialog(dialog,message){
+  if(message != undefined){
+    dialog.find('.message').text(message);
+    waittime=3000;
+  }
+  else{
+    waittime = 1;
+  }
+  setTimeout(function(){
+    dialog.dialog("close");
+    dialog.remove();
+  },waittime);
+}
+
+function setModalLinks(container){
+  obj=container.container;
+  obj.find('a.addlink').click(function(e){
+    container=jQuery(this).parent()
+    url=jQuery(this).attr('href')
+    dialog=jQuery("<div class='modalForm'><iframe src='"+url+"'></iframe></div>");
+    jQuery('body').append(dialog);
+    dialog = dialog.dialog({
+      autoOpen: false,
+      width: 400,
+      height: 400,
+      modal: true,
+      buttons: {
+        Save: function(){
+          jQuery(this).find("iframe").contents().find("form").submit();
+        }
+      }
+    });
+    dialog.dialog("open");
+    dialog.find('iframe').load(function(){
+      cleanupModalForm(dialog,container);
+    });
+    return false;
+  });
+  obj.find('a.deletelink').click(function(e){
+    console.log(jQuery(this));
+    url=jQuery(this).attr('href')
+    dialog=openWaitDialog('Just a moment please.')
+    jQuery.get(url,function(){
+      closeWaitDialog(dialog);
+      sampleid=samForm.container.find("input[name='id']").val();
+      if(sampleid!=undefined){
+            obsList.render({sample_id:sampleid})
+      }
+    });
+    return false;
+  });
+
+}
+
+var formContainer = function (id,classes) {
+  this.id = id;
+  classes = classes || [];
+  this.classes = ['ajaxForm'].concat(classes);
+  this.container = null;
+};
+
+formContainer.prototype.render = function(params){
+  this.container = jQuery("#"+this.id)
+  this.params = params || {}
+  if (this.container.length==0){
+      this.container = jQuery("<div class='"+this.classes.join(" ")+"' id='"+this.id+"'></div>");
+      jQuery("#forms").append(this.container);
+  }
+}
+
+var ObservationList = function(){
+  this.url='observation/'
+  formContainer.call(this, id='ObservationList', classes=['list']);
+}
+ObservationList.prototype = Object.create(formContainer.prototype);
+ObservationList.prototype.constructor = ObservationList;
+ObservationList.prototype.render = function(){
+  formContainer.prototype.render.apply(this,arguments)
+  jQuery.ajax({method:'get',url:this.url+'?'+jQuery.param(this.params),context:this,success:function(data){
+    this.container.html(data)
+    setModalLinks(this)
+  }});
+}
+
+var ObservationForm = function(){
+  this.url='observation/new';
+  formContainer.call(this, id='observationForm', classes=[]);
+}
+ObservationForm.prototype = Object.create(formContainer.prototype);
+ObservationForm.prototype.constructor = ObservationForm;
+ObservationForm.prototype.setSaveButtons = function(){
+  this.container.find('button[name="save"]').remove();
+  this.container.find('button[name=save_new]').removeAttr('onclick');
+  form=this.container.find('form')
+  this.container.find('button[name="save_new"]').click({form:form},function(e){
+    e.data.form.find('input[name=redirect]').val('form');
+    e.data.form.submit();
+  });
+}
+ObservationForm.prototype.render = function(){
+  if(this.container == null){
+    formContainer.prototype.render.apply(this,arguments);
+    this.getAjaxForm();
+  }
+  else{
+    formContainer.prototype.render.apply(this,arguments);
+    this.setAjaxForm();
+  }
+}
+
+ObservationForm.prototype.getAjaxForm = function(){
+  url=this.url+'?'+jQuery.param(this.params)
+  jQuery.ajax({
+    url:url,
+    method:'get',
+    context:this,
+    success: function(data){
+      this.container.html(data);
+      this.setAjaxForm();
+      setModalLinks(this);
+      this.setSaveButtons();
+    }
+  });
+}
+
+ObservationForm.prototype.setAjaxForm = function(){
+  this.container.find('form').submit(function(e){
+    dialog=openWaitDialog('Saving observation.');
+    e.preventDefault();
+    jQuery.ajax({
+      method:"POST",
+      url: jQuery(this).attr('action'),
+      data: jQuery(this).serialize(),
+      success:function(data,textStatus){
+        closeWaitDialog(dialog);
+        obsForm.container.html(data)
+        obsForm.setAjaxForm();
+        setModalLinks(obsForm);
+        obsForm.setSaveButtons();
+        jQuery('#messages').html("<div class='message'>Observation saved.</div>");
+        obsList.render({sample_id:obsForm.params['sample']});
+      },
+      error:function(data,textStatus){
+        console.log('error');
+      }
+    });
+    return false;
+  });
+}
+
+
+
+var SampleForm = function(){
+  this.url='sample/new';
+  formContainer.call(this, id='sampleForm', classes=[]);
+}
+SampleForm.prototype = Object.create(formContainer.prototype);
+SampleForm.prototype.constructor = SampleForm;
+SampleForm.prototype.setSaveButtons = function(){
+  this.container.find('button[name="save_new"]').remove();
+  this.container.find('button[name=save]').removeAttr('onclick');
+  form=this.container.find('form')
+  this.container.find('button[name="save"]').click({form:form},function(e){
+    e.data.form.submit();
+  });
+}
+
+SampleForm.prototype.render = function(){
+  formContainer.prototype.render.apply(this,arguments)
+  jQuery.ajax({
+    url:this.url,
+    method:'GET',
+    context:this,
+    success:function(data){
+      this.container.html(data)
+      this.setAjaxForm();
+      this.setSaveButtons();
+      setModalLinks(this);
+    }
+  });
+}
+SampleForm.prototype.setAjaxForm = function(){
+  form = this.container.find("form");
+  this.container.find("form").submit(function(e){
+    e.preventDefault();
+    jQuery.ajax({
+      method: "POST",
+      url: jQuery(this).attr('action'),
+      data: jQuery(this).serialize(),
+      success:function(data,textStatus){
+        samForm.container.html(data);
+        setModalLinks(samForm);
+        samForm.setAjaxForm();
+        samForm.setSaveButtons();
+        sampleid=samForm.container.find("input[name='id']").val();
+        if(sampleid!=undefined){
+            jQuery('#messages').append("<div class='message'>Sample saved.</div>");
+            obsList.render({sample_id:sampleid})
+            obsForm.render({sample:sampleid});
+        }
+      },
+      error:function(data,textStatus){
+        console.log('error');
+      }
+    });
+    return false;
+  });
+}
+
+
+var obsList = new ObservationList();
+var obsForm = new ObservationForm();
+var samForm = new SampleForm();
+
+jQuery(document).ready(function(){
+  samForm.render();
+});
+</script>
+</head>
+<body id='dataEntryForm'>
+  <div id='messages'></div>
+  <div id="forms">
+  </div>
+</body>
+</html>

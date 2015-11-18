@@ -71,7 +71,9 @@ def map_column_type(c):
     if not c.nullable:
         args.append(wtforms.validators.InputRequired())
     kwargs=field.get('kwargs',{})
-    return {'widget':field['widget'],'label':c.name,'args':args,'kwargs':kwargs}
+    html_attributes=field.get('html_attributes',{})
+    return {'widget':field['widget'],'label':c.name,'args':args,'kwargs':kwargs,
+            'html_attributes':html_attributes}
 
 
 def get_data_attributes(obj):
@@ -109,8 +111,8 @@ def get_values(inst):
         v=getattr(inst,c)
         if isinstance(v,list):
             v=",".join([v2 and str(v2) or None for v2 in v])
-        else:
-            v=v and wtforms.utils.intget(v) or (v and str(v) or None)
+        #else:
+        #    v=v and wtforms.utils.intget(v) or (v and str(v) or None)
         values.append((c,v))
     values.append(('id',inst.id))
     return OrderedDict(values)
@@ -182,11 +184,13 @@ def get_fields(obj,orm):
         fields[fname]={ 
             'widget':wtforms.SelectField,
             'label':fname,
+            'args':[],
+            'html_attributes':{'data-values_url':'%s/'%fname},
             'kwargs':{
-                'choises':[[(v.id, str(v)) for v in values]],
+                'choices':[[(v.id, str(v)) for v in values]],
                 'description':
                     "<a class='addlink' href='%s/new'>Add %s</a>"%(fname,fname),
-                'data-values_url':'%s/'%fname}}
+                }}
     for attr in get_multi_relation_attributes(obj):
         #turn foreign keys for many-to-many relations into dropdowns with the id as value 
         #and the column "name" as description
@@ -197,11 +201,13 @@ def get_fields(obj,orm):
         fields[fname]={ 
             'widget':wtforms.SelectMultipleField,
             'label':attr.key,
+            'args':[],
+            'html_attributes':{'data-values_url':'%s/'%fname},
             'kwargs':{
                 'choices':[[(v.id, str(v)) for v in values]],
                 'description':
                     "<a class='addlink' href='%s/new'>Add %s</a>"%(fname,fname),
-                'data-values_url':'%s/'%fname}}
+                }}
     for c in get_simple_columns(obj):
         #map the form widgets by the SQLAlchemy column type
         fields[c.name]=map_column_type(c)
@@ -220,8 +226,8 @@ def get_fields(obj,orm):
 
     for k,v in fields.items():
         #instantiate the widgets
-        print ("k: %s v:%s"%(k,v))
         fields[k]=v['widget'](v['label'],*v['args'],**v['kwargs'])
-    fields.values()[0].attrs['autoFocus']=True
+        fields[k].html_attributes=v['html_attributes']
+    fields.values()[0].html_attributes['autoFocus']=True
 
     return fields
