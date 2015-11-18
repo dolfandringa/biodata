@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Integer, String, Unicode, Table, Date, Time
-from sqlalchemy import ForeignKey, UnicodeText
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey, UnicodeText, create_engine
+from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import biodata
+import datetime
 
 Base = declarative_base()
 
@@ -31,4 +32,5 @@ class TestObservation(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, nullable=False)
     sample_id = Column(Integer, ForeignKey('testsample.id'), nullable=False)
-    sample = relationship("TestSample", backref="observations")
+    sample = relationship("TestSample", backref="observations")    
+    

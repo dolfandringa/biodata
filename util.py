@@ -8,16 +8,18 @@ from collections import OrderedDict
 import decimal
 from flask import request
 
-def get_object(datasetname,classname):
+
+def get_object(datasetname, classname):
     """
     Maps a strings for datasetname and classname to the correct
     SQLAlchemy object for that dataset and class
     """
-    ds = dict([(cls.__name__.split('.')[-1],cls) for cls in datasets])
+    ds = dict([(cls.__name__.split('.')[-1], cls) for cls in datasets])
     dataset = ds[datasetname]
-    classes = dict([(obj.__name__.lower(),obj) for obj in dataset.tables])
+    classes = dict([(obj.__name__.lower(), obj) for obj in dataset.tables])
     cls = classes[classname]
     return cls
+
 
 def json_desired():
     """
@@ -31,33 +33,36 @@ def json_desired():
         request.accept_mimetypes[best] > \
         request.accept_mimetypes['text/html']
 
-def validator(message,func):
+
+def validator(message, func):
     """
-    Wrapper around the our validator functions to work with wtforms. 
-    It should get a message string which for validation failure and a 
+    Wrapper around the our validator functions to work with wtforms.
+    It should get a message string which for validation failure and a
     function which returns a bool to check valid input.
     """
-    def wrapper(form,field):
+    def wrapper(form, field):
         validates = func(field.data)
         if not validates and field.data is not None:
             raise wtforms.ValidationError(message)
     return wrapper
 
+
 __type_map = {
-    sa_types.Integer: {'widget':wtforms.IntegerField},
-    sa_types.Numeric: {'widget':wtforms.DecimalField},
-    sa_types.Unicode: {'widget':wtforms.StringField},
-    sa_types.String: {'widget':wtforms.StringField},
-    sa_types.UnicodeText: {'widget':wtforms.TextAreaField},
+    sa_types.Integer: {'widget': wtforms.IntegerField},
+    sa_types.Numeric: {'widget': wtforms.DecimalField},
+    sa_types.Unicode: {'widget': wtforms.StringField},
+    sa_types.String: {'widget': wtforms.StringField},
+    sa_types.UnicodeText: {'widget': wtforms.TextAreaField},
     sa_types.Date: {
-        'widget':wtforms.DateField,
-        'kwargs':{'description':" format: YYYY-MM-DD",
-                  'format': '%Y-%m-%d'}},
+        'widget': wtforms.DateField,
+        'kwargs': {'description': " format: YYYY-MM-DD",
+                   'format': '%Y-%m-%d'}},
     sa_types.Time: {
-        'widget':wtforms.DateTimeField,
-        'kwargs':{'description':" format: HH:MM",
-                  'format': '%H:%M'}},
+        'widget': wtforms.DateTimeField,
+        'kwargs': {'description': " format: HH:MM",
+                   'format': '%H:%M'}},
 }
+
 
 def map_column_type(c):
     """
@@ -66,15 +71,15 @@ def map_column_type(c):
     label being the label for the field and args and kwargs being the
     additional arguments for the field.
     """
-    field =  __type_map.get(c.type.__class__)
-    args=field.get('args',[])
-    
+    field = __type_map.get(c.type.__class__)
+    args = field.get('args', [])
+
     if not c.nullable:
         args.append(wtforms.validators.InputRequired())
-    kwargs=field.get('kwargs',{})
-    html_attributes=field.get('html_attributes',{})
-    return {'widget':field['widget'],'label':c.name,'args':args,'kwargs':kwargs,
-            'html_attributes':html_attributes}
+    kwargs = field.get('kwargs', {})
+    html_attributes = field.get('html_attributes', {})
+    return {'widget': field['widget'], 'label': c.name, 'args': args,
+            'kwargs': kwargs, 'html_attributes': html_attributes}
 
 
 def get_data_attributes(obj):
@@ -83,13 +88,15 @@ def get_data_attributes(obj):
     for an SQLALchemy object.
     """
     for prop in dir(obj):
-        attr = getattr(obj,prop)
-        if not hasattr(attr,'property'):
+        attr = getattr(obj, prop)
+        if not hasattr(attr, 'property'):
             continue
-        if hasattr(obj,'formfields') and prop in obj.formfields.keys() and obj.formfields[prop].get('skip',False)==True:
-            #This property should be skipped for the interface
+        if hasattr(obj, 'formfields') and prop in obj.formfields.keys() and \
+                obj.formfields[prop].get('skip', False) == True:
+            # This property should be skipped for the interface
             continue
         yield attr
+
 
 def get_colnames(cls):
     """
@@ -101,21 +108,22 @@ def get_colnames(cls):
     rel_multi_columns = [c.key for c in get_multi_relation_attributes(cls)]
     return columns+rel_columns+rel_multi_columns
 
+
 def get_values(inst):
     """
     Retrieves all the values for an SQLAlchemy instance (table row).
-    It converts list values (like one-to-many relation attributes) 
+    It converts list values (like one-to-many relation attributes)
     into a comma separated string of string representations of the list items.
     """
     values = []
     for c in get_colnames(inst.__class__):
-        v=getattr(inst,c)
-        if isinstance(v,list):
-            v=",".join([v2 and str(v2) or None for v2 in v])
-        #else:
+        v = getattr(inst, c)
+        if isinstance(v, list):
+            v = ",".join([v2 and str(v2) or None for v2 in v])
+        # else:
         #    v=v and wtforms.utils.intget(v) or (v and str(v) or None)
-        values.append((c,v))
-    values.append(('id',inst.id))
+        values.append((c, v))
+    values.append(('id', inst.id))
     return OrderedDict(values)
 
 
@@ -126,29 +134,31 @@ def get_simple_columns(obj):
     """
     fields = []
     for attr in get_data_attributes(obj):
-        if isinstance(attr.property,ColumnProperty):
-            #this is a normal column property
-            #map the column to it's form equivalent
+        if isinstance(attr.property, ColumnProperty):
+            # this is a normal column property
+            # map the column to it's form equivalent
             for c in attr.property.columns:
-                if len(c.foreign_keys)>0:
-                    #skip foreign keys
+                if len(c.foreign_keys) > 0:
+                    # skip foreign keys
                     continue
                 if c.primary_key:
-                    #skip the primary key
+                    # skip the primary key
                     continue
                 yield c
+
 
 def get_relation_attributes(obj):
     """
     Gets all one-to-many relationship attributes for an SQLAlchemy object.
     """
     for attr in get_data_attributes(obj):
-        if isinstance(attr.property,RelationshipProperty):
-            if attr.property.uselist == True:
-                #skip the property if it is on the Many side of One-to-Many
-                #or Many-to-Many relationships
+        if isinstance(attr.property, RelationshipProperty):
+            if attr.property.uselist is True:
+                # skip the property if it is on the Many side of One-to-Many
+                # or Many-to-Many relationships
                 continue
             yield attr
+
 
 def get_multi_relation_attributes(obj):
     """
@@ -163,11 +173,13 @@ def get_multi_relation_attributes(obj):
                 #this is a Many-to-Many relationship
                 yield attr
 
+
 def get_primary_keys(obj):
     """
     Gets all primary keys for an SQLAlchemy object.
     """
     return [c.name for c in inspect(obj).primary_key]
+
 
 def get_fields(obj,orm):
     """
