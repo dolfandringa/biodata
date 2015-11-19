@@ -9,9 +9,8 @@ class _BaseTest(TestCase):
     """
     
     def setUp(self):
-        biodata.app.config['TESTING'] = True
-        self.app = biodata.app
-        self.client = biodata.app.test_client()
+        self.app = biodata.get_app(testing = True)
+        self.client = self.app.test_client()
     
     def tearDown(self):
         pass
@@ -24,8 +23,8 @@ class _BaseDBTest(_BaseTest):
     """
     def setUp(self):
         _BaseTest.setUp(self)
-        biodata.init_db()
-        with biodata.app.app_context():
+        biodata.init_db(self.app)
+        with self.app.app_context():
             speciesgroup = model.rvc_species.SpeciesGroup(name=u'testgroup')
             biodata.db.session.add(speciesgroup)
             site = model.rvc_species.Site(name=u"TestSite")
@@ -42,7 +41,7 @@ class _BaseDBTest(_BaseTest):
 
         
     def tearDown(self):
-        with biodata.app.app_context():
+        with self.app.app_context():
             biodata.db.drop_all()
 
 def setupdb(uri):
@@ -59,8 +58,8 @@ def setupdb(uri):
 def load_data(session):
     """Load test data"""
     add = session.add
-    dolf = model.rvc_species.Observer(name = u'dolf')
-    annelies = model.rvc_species.Observer(name = u'annelies')
+    dolf = model.rvc_species.Observer(name = u'Dolf')
+    annelies = model.rvc_species.Observer(name = u'Annelies')
     add(dolf)
     add(annelies)
     

@@ -7,12 +7,12 @@
 <body id='{{ name }}List' class='list'>
   <div class="headerrow">
     {% for k in fields %}
-      <span class='headerfield $k'>{{ k }}</span>
-      <span class='headerfield deletelink'>&nbsp;</span>
+      <span class='headerfield {{ k }}'>{{ k }}</span>
     {% endfor %}
+    <span class='headerfield deletelink'>&nbsp;</span>
   </div>
     {% for inst in instances %}
-        <div class='datarow {{ loop.cycle("odd","even") }}'>
+        <div class='datarow {{ loop.cycle("even","odd") }}'>
             {% for k in fields %}
                 <span class="datafield {{ k }}">{{ inst[k] or '' }}</span>
             {% endfor %}
