@@ -71,6 +71,7 @@ def map_column_type(c):
     label being the label for the field and args and kwargs being the
     additional arguments for the field.
     """
+
     field = __type_map.get(c.type.__class__)
     args = field.get('args', [])
 
@@ -87,6 +88,7 @@ def get_data_attributes(obj):
     Get all the data attributes (table columns/relationships, etc)
     for an SQLALchemy object.
     """
+
     for prop in dir(obj):
         attr = getattr(obj, prop)
         if not hasattr(attr, 'property'):
@@ -103,6 +105,7 @@ def get_colnames(cls):
     Retrieves all the field names for an sqlalchemy class, including
     relation attributes.
     """
+
     columns = [c.name for c in get_simple_columns(cls)]
     rel_columns = [c.key for c in get_relation_attributes(cls)]
     rel_multi_columns = [c.key for c in get_multi_relation_attributes(cls)]
@@ -115,6 +118,7 @@ def get_values(inst):
     It converts list values (like one-to-many relation attributes)
     into a comma separated string of string representations of the list items.
     """
+
     values = []
     for c in get_colnames(inst.__class__):
         v = getattr(inst, c)
@@ -134,6 +138,7 @@ def get_simple_columns(obj):
     Retrieves the 'normal' fields for an SQLAlchemy object. This excludes
     any fields defined through relationship attributes.
     """
+
     fields = []
     for attr in get_data_attributes(obj):
         if isinstance(attr.property, ColumnProperty):
@@ -153,6 +158,7 @@ def get_relation_attributes(obj):
     """
     Gets all one-to-many relationship attributes for an SQLAlchemy object.
     """
+
     for attr in get_data_attributes(obj):
         if isinstance(attr.property, RelationshipProperty):
             if attr.property.uselist is True:
@@ -166,13 +172,14 @@ def get_multi_relation_attributes(obj):
     """
     Gets all many-to-many relationship attributes for an SQLAlchemy object.
     """
+
     for attr in get_data_attributes(obj):
-        prop=attr.property
-        if isinstance(prop,RelationshipProperty) and prop.backref!=None:
+        prop = attr.property
+        if isinstance(prop, RelationshipProperty) and prop.backref is not None:
             target = prop.mapper.entity
-            target_prop = getattr(target,prop.backref).property
-            if prop.uselist == True and target_prop.uselist == True:
-                #this is a Many-to-Many relationship
+            target_prop = getattr(target, prop.backref).property
+            if prop.uselist is True and target_prop.uselist is True:
+                # this is a Many-to-Many relationship
                 yield attr
 
 
@@ -180,69 +187,74 @@ def get_primary_keys(obj):
     """
     Gets all primary keys for an SQLAlchemy object.
     """
+
     return [c.name for c in inspect(obj).primary_key]
 
 
-def get_fields(obj,orm):
+def get_fields(obj, orm):
     """
     Gets wtform fields for all attributes of an SQLAlchemy object.
-    It maps SQLAlchemy attributes to wtform fields, taking relationship 
+    It maps SQLAlchemy attributes to wtform fields, taking relationship
     attributes (one-to-many and many-to-many) into account.
     """
+
     fields = OrderedDict()
     for attr in get_relation_attributes(obj):
-        #turn foreign keys into dropdowns with the id as value 
-        #and the column "name" as description
+        # turn foreign keys into dropdowns with the id as value
+        # and the column "name" as description
         target = attr.property.mapper.entity
         values = orm.query(target).all()
-        fname = getattr(target,'pretty_name',attr.key)
-        fields[fname]={ 
-            'widget':wtforms.SelectField,
-            'label':fname,
-            'args':[],
-            'html_attributes':{'data-values_url':'%s/'%fname},
-            'kwargs':{
-                'choices':[[(v.id, str(v)) for v in values]],
+        fname = getattr(target, 'pretty_name', attr.key)
+        fields[fname] = {
+            'widget': wtforms.SelectField,
+            'label': fname,
+            'args': [],
+            'html_attributes': {'data-values_url': '%s/' % fname},
+            'kwargs': {
+                'choices': [[(v.id, str(v)) for v in values]],
                 'description':
-                    "<a class='addlink' href='%s/new'>Add %s</a>"%(fname,fname),
+                    "<a class='addlink' href='%s/new'>Add %s</a>" %
+                    (fname, fname),
                 }}
     for attr in get_multi_relation_attributes(obj):
-        #turn foreign keys for many-to-many relations into dropdowns with the id as value 
-        #and the column "name" as description
-        #the dropdown should allow multiple values
+        # turn foreign keys for many-to-many relations into dropdowns
+        # with the id as value and the column "name" as description
+        # the dropdown should allow multiple values
         target = attr.property.mapper.entity
         values = orm.query(target).all()
-        fname = getattr(target,'pretty_name',target.__name__)
-        fields[fname]={ 
-            'widget':wtforms.SelectMultipleField,
-            'label':attr.key,
-            'args':[],
-            'html_attributes':{'data-values_url':'%s/'%fname},
-            'kwargs':{
-                'choices':[[(v.id, str(v)) for v in values]],
+        fname = getattr(target, 'pretty_name', target.__name__)
+        fields[fname] = {
+            'widget': wtforms.SelectMultipleField,
+            'label': attr.key,
+            'args': [],
+            'html_attributes': {'data-values_url': '%s/' % fname},
+            'kwargs': {
+                'choices': [[(v.id, str(v)) for v in values]],
                 'description':
-                    "<a class='addlink' href='%s/new'>Add %s</a>"%(fname,fname),
+                    "<a class='addlink' href='%s/new'>Add %s</a>" %
+                    (fname, fname),
                 }}
     for c in get_simple_columns(obj):
-        #map the form widgets by the SQLAlchemy column type
-        fields[c.name]=map_column_type(c)
+        # map the form widgets by the SQLAlchemy column type
+        fields[c.name] = map_column_type(c)
 
-    if hasattr(obj,'formfields'):
-        #adjust the widgets by the arguments defined in the model
-        for k,v in obj.formfields.items():
-            field = fields.get(k,{})
-            if v.get('skip',False) == True:
+    if hasattr(obj, 'formfields'):
+        # adjust the widgets by the arguments defined in the model
+        for k, v in obj.formfields.items():
+            field = fields.get(k, {})
+            if v.get('skip', False) is True:
                 continue
-            args = v.get('args',field.get('args',[]))
-            kwargs = field.get('kwargs',{})
-            kwargs.update(v.get('kwargs',{}))
-            widget = v.get('widget',field.get('widget'))
-            fields[k] = {'label':k,'widget':widget,'args':args,'kwargs':kwargs}
+            args = v.get('args', field.get('args', []))
+            kwargs = field.get('kwargs', {})
+            kwargs.update(v.get('kwargs', {}))
+            widget = v.get('widget', field.get('widget'))
+            fields[k] = {'label': k, 'widget': widget,
+                         'args': args, 'kwargs': kwargs}
 
-    for k,v in fields.items():
-        #instantiate the widgets
-        fields[k]=v['widget'](v['label'],*v['args'],**v['kwargs'])
-        fields[k].html_attributes=v['html_attributes']
-    fields.values()[0].html_attributes['autoFocus']=True
+    for k, v in fields.items():
+        # instantiate the widgets
+        fields[k] = v['widget'](v['label'], *v['args'], **v['kwargs'])
+        fields[k].html_attributes = v['html_attributes']
+    fields.values()[0].html_attributes['autoFocus'] = True
 
     return fields

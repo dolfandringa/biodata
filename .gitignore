@@ -2,3 +2,4 @@
 settings.cfg
 .*.swp
 /.coverage
+/.settings

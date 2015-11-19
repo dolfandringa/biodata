@@ -21,10 +21,10 @@ def index(datasetname, clsname):
     obj = get_object(datasetname, clsname)
     for k in request.args.keys():
         v = request.args.getlist(k)
-        if isinstance(v,list) and len(v)>1:
-            v = or_(*[getattr(obj,k) == v1 for v1 in v])
-        elif isinstance(v,list):
-            v = getattr(obj,k) == v[0]
+        if isinstance(v, list) and len(v) > 1:
+            v = or_(*[getattr(obj, k) == v1 for v1 in v])
+        elif isinstance(v, list):
+            v = getattr(obj, k) == v[0]
         params.append(v)
     if params:
         instances = g.db.session.query(obj).filter(and_(*params)).all()
@@ -49,20 +49,21 @@ def edit(datasetname, clsname, id):
 def show(datasetname, clsname, id):
     """
     Show one specific object.
-    
+
     :param datasetname: The name of the dataset to fetch the instance for.
     :param clsname: The name of the class to fetch the instance for.
     :param id: The id of the instance to fetch.
     """
     cls = get_object(datasetname, clsname)
     inst = g.db.session.query(cls).get(id)
-    if inst == None:
+    if inst is None:
         fields = {}
-        flash("%s with id %s not found"%(clsname,id))
+        flash("%s with id %s not found" % (clsname, id))
     else:
         fields = get_values(inst)
     retval = {'classname': clsname, 'id': id, 'fields': fields}
-    return render_template('show.html',**retval)
+    return render_template('show.html', **retval)
+
 
 @basebp.route("/<datasetname>/<clsname>/new")
 def new(datasetname, clsname):
