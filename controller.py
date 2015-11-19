@@ -65,6 +65,11 @@ def show(datasetname, clsname, id):
     return render_template('show.html', **retval)
 
 
-@basebp.route("/<datasetname>/<clsname>/new")
-def new(datasetname, clsname):
+@basebp.route("/<datasetname>/new", methods=["POST","GET"])
+def newsample(datasetname):
+    pass
+
+
+@basebp.route("/<datasetname>/<clsname>/new", methods=["POST","GET"])
+def newclass(datasetname, clsname):
     pass
