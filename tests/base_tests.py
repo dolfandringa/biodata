@@ -25,19 +25,7 @@ class _BaseDBTest(_BaseTest):
         _BaseTest.setUp(self)
         biodata.init_db(self.app)
         with self.app.app_context():
-            speciesgroup = model.rvc_species.SpeciesGroup(name=u'testgroup')
-            biodata.db.session.add(speciesgroup)
-            site = model.rvc_species.Site(name=u"TestSite")
-            biodata.db.session.add(site)
-            observer = model.rvc_species.Observer(name=u"Dolf")
-            biodata.db.session.add(observer)
-            sample = model.rvc_species.Sample()
-            sample.date = datetime.datetime.now()
-            sample.site = site
-            sample.speciesgroup = speciesgroup
-            sample.participants.append(observer)
-            biodata.db.session.add(sample)
-            biodata.db.session.commit()
+            load_data(biodata.db.session)
 
         
     def tearDown(self):
@@ -58,8 +46,8 @@ def setupdb(uri):
 def load_data(session):
     """Load test data"""
     add = session.add
-    dolf = model.rvc_species.Observer(name = u'Dolf')
-    annelies = model.rvc_species.Observer(name = u'Annelies')
+    dolf = model.rvc_species.Observer(name = u'dolf')
+    annelies = model.rvc_species.Observer(name = u'annelies')
     add(dolf)
     add(annelies)
     
@@ -70,8 +58,8 @@ def load_data(session):
     add(specgroup)
     
     sample1 = model.rvc_species.Sample()
-    sample1.date = datetime.datetime.now()
-    sample1.time = datetime.datetime.now()
+    sample1.date = datetime.datetime(2015,11,18)
+    sample1.time = datetime.datetime(2015,11,18,21,38,39,881432)
     sample1.participants = [dolf]
     sample1.site = guinsuan
     sample1.speciesgroup = specgroup
@@ -79,8 +67,8 @@ def load_data(session):
     
     sample2 = model.rvc_species.Sample()
     sample2.name = u'test2'
-    sample2.date = datetime.datetime.now()
-    sample2.time = datetime.datetime.now()
+    sample2.date = datetime.datetime(2015,11,18)
+    sample2.time = datetime.datetime(2015,11,18,21,38,39,882212)
     sample2.participants = [dolf, annelies]
     sample2.site = guinsuan
     sample2.speciesgroup = specgroup

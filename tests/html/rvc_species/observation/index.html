@@ -1,9 +1,10 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>Observations</title>
+<title>Observation</title>
 <link href="/static/css/styles.css" rel="stylesheet" />
 </head>
-<body id='observationList' class='list'>
+<body id='ObservationList' class='list'>
   <div class="headerrow">
     <span class='headerfield comments'>comments</span>
     <span class='headerfield score_0_9'>score_0_9</span>
@@ -14,6 +15,7 @@
     <span class='headerfield observer'>observer</span>
     <span class='headerfield sample'>sample</span>
     <span class='headerfield species'>species</span>
+    <span class='headerfield editlink'>&nbsp;</span>
     <span class='headerfield deletelink'>&nbsp;</span>
   </div>
   <div class='datarow even'>
@@ -26,7 +28,8 @@
     <span class="datafield observer">dolf</span>
     <span class="datafield sample">1 at guinsuan</span>
     <span class="datafield species"></span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete?id=1'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/observation/edit/1'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete/1'>delete</a></span>
   </div>
   <div class='datarow odd'>
     <span class="datafield comments"></span>
@@ -38,7 +41,8 @@
     <span class="datafield observer">dolf</span>
     <span class="datafield sample">1 at guinsuan</span>
     <span class="datafield species">com0</span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete?id=2'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/observation/edit/2'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete/2'>delete</a></span>
   </div>
   <div class='datarow even'>
     <span class="datafield comments"></span>
@@ -50,7 +54,8 @@
     <span class="datafield observer">dolf</span>
     <span class="datafield sample">1 at guinsuan</span>
     <span class="datafield species">com1</span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete?id=3'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/observation/edit/3'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete/3'>delete</a></span>
   </div>
   <div class='datarow odd'>
     <span class="datafield comments"></span>
@@ -62,7 +67,8 @@
     <span class="datafield observer">dolf</span>
     <span class="datafield sample">1 at guinsuan</span>
     <span class="datafield species">com2</span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete?id=4'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/observation/edit/4'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete/4'>delete</a></span>
   </div>
   <div class='datarow even'>
     <span class="datafield comments"></span>
@@ -74,7 +80,8 @@
     <span class="datafield observer">dolf</span>
     <span class="datafield sample">1 at guinsuan</span>
     <span class="datafield species">com3</span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete?id=5'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/observation/edit/5'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete/5'>delete</a></span>
   </div>
   <div class='datarow odd'>
     <span class="datafield comments"></span>
@@ -86,7 +93,8 @@
     <span class="datafield observer">dolf</span>
     <span class="datafield sample">1 at guinsuan</span>
     <span class="datafield species">com4</span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete?id=6'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/observation/edit/6'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete/6'>delete</a></span>
   </div>
   <div class='datarow even'>
     <span class="datafield comments"></span>
@@ -98,7 +106,8 @@
     <span class="datafield observer">dolf</span>
     <span class="datafield sample">1 at guinsuan</span>
     <span class="datafield species">com5</span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete?id=7'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/observation/edit/7'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete/7'>delete</a></span>
   </div>
   <div class='datarow odd'>
     <span class="datafield comments"></span>
@@ -110,7 +119,8 @@
     <span class="datafield observer">dolf</span>
     <span class="datafield sample">1 at guinsuan</span>
     <span class="datafield species">com6</span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete?id=8'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/observation/edit/8'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete/8'>delete</a></span>
   </div>
   <div class='datarow even'>
     <span class="datafield comments"></span>
@@ -122,7 +132,8 @@
     <span class="datafield observer">dolf</span>
     <span class="datafield sample">1 at guinsuan</span>
     <span class="datafield species">com7</span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete?id=9'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/observation/edit/9'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete/9'>delete</a></span>
   </div>
   <div class='datarow odd'>
     <span class="datafield comments"></span>
@@ -134,7 +145,8 @@
     <span class="datafield observer">dolf</span>
     <span class="datafield sample">1 at guinsuan</span>
     <span class="datafield species">com8</span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete?id=10'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/observation/edit/10'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/observation/delete/10'>delete</a></span>
   </div>
 </body>
 </html>

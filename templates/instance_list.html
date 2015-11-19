@@ -5,10 +5,20 @@
 <link href="/static/css/styles.css" rel="stylesheet" />
 </head>
 <body id='{{ name }}List' class='list'>
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+	    <ul class=flashes>
+	    {% for message in messages %}
+	      <li>{{ message }}</li>
+	    {% endfor %}
+	    </ul>
+	  {% endif %}
+	{% endwith %}
   <div class="headerrow">
     {% for k in fields %}
       <span class='headerfield {{ k }}'>{{ k }}</span>
     {% endfor %}
+    <span class='headerfield editlink'>&nbsp;</span>
     <span class='headerfield deletelink'>&nbsp;</span>
   </div>
     {% for inst in instances %}

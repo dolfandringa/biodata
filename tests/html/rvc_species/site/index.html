@@ -1,15 +1,17 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>Observations</title>
+<title>Site</title>
 <link href="/static/css/styles.css" rel="stylesheet" />
 </head>
-<body id='observationList' class='list'>
+<body id='SiteList' class='list'>
   <div class="headerrow">
     <span class='headerfield barangay'>barangay</span>
     <span class='headerfield lat'>lat</span>
     <span class='headerfield lon'>lon</span>
     <span class='headerfield municipality'>municipality</span>
     <span class='headerfield name'>name</span>
+    <span class='headerfield editlink'>&nbsp;</span>
     <span class='headerfield deletelink'>&nbsp;</span>
   </div>
   <div class='datarow even'>
@@ -18,7 +20,8 @@
     <span class="datafield lon"></span>
     <span class="datafield municipality"></span>
     <span class="datafield name">guinsuan</span>
-  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/site/delete?id=1'>delete</a></span>
+  <span class="datafield editlink"><a class="editlink" href='/rvc_species/site/edit/1'>edit</a></span>
+  <span class="datafield deletelink"><a class="deletelink" href='/rvc_species/site/delete/1'>delete</a></span>
   </div>
 </body>
 </html>

@@ -120,6 +120,8 @@ def get_values(inst):
         v = getattr(inst, c)
         if isinstance(v, list):
             v = ",".join([v2 and str(v2) or None for v2 in v])
+        if v is None:
+            v = ''
         # else:
         #    v=v and wtforms.utils.intget(v) or (v and str(v) or None)
         values.append((c, v))

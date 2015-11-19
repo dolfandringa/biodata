@@ -143,6 +143,9 @@ class UtilTestDB(_BaseDBTest):
             sample = biodata.db.session.query(model.rvc_species.Sample).get(1)
             values = get_values(sample)
             self.assertEqual(len(values),6)
+            site = biodata.db.session.query(model.rvc_species.Site).get(1)
+            values = get_values(site)
+            self.assertEqual(values['lon'],"")
     
     def test_get_fields(self):
         """
