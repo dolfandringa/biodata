@@ -1,10 +1,12 @@
 from base_tests import _BaseDBTest, _BaseTest
 import testmodel
 import biodata
+from biodata import model
 import os
 import re
 import lxml
 from pyquery import PyQuery as pq
+import json
 
 curdir = os.path.dirname(os.path.abspath(__file__))
 
@@ -68,6 +70,24 @@ class ControllerTest(_BaseDBTest):
                 # remove whitespace at the beginning of a line
                 expected = re.sub(r, "", expected)
                 self.assertMultiLineEqual(expected, result)
+
+    def test_delete(self):
+        """
+        Test the list controller with selection parameters.
+        """
+
+        with self.app.app_context():
+            samples = self.session.query(model.rvc_species.Sample).all()
+            self.assertEqual(len(samples), 2)
+            response = self.client.get('/rvc_species/sample/delete/1')
+            # should return 405 as only POST is allowed.
+            self.assertEqual(response.status_code, 405)
+            response = self.client.post('/rvc_species/sample/delete/1')
+            self.assertEqual(response.status_code, 200)
+            result = json.loads(response.get_data())
+            self.assertEqual(result, {'success': True})
+            samples = self.session.query(model.rvc_species.Sample).all()
+            self.assertEqual(len(samples), 1)
 
     def test_list_arguments(self):
         """

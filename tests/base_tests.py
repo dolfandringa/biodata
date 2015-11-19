@@ -10,6 +10,7 @@ class _BaseTest(TestCase):
     
     def setUp(self):
         self.app = biodata.get_app(testing = True)
+        self.session = biodata.db.session
         self.client = self.app.test_client()
     
     def tearDown(self):

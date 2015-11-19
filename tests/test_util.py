@@ -158,10 +158,10 @@ class UtilTestDB(_BaseDBTest):
         """
 
         with self.app.app_context():
-            sample = biodata.db.session.query(model.rvc_species.Sample).get(1)
+            sample = self.session.query(model.rvc_species.Sample).get(1)
             values = get_values(sample)
             self.assertEqual(len(values), 6)
-            site = biodata.db.session.query(model.rvc_species.Site).get(1)
+            site = self.session.query(model.rvc_species.Site).get(1)
             values = get_values(site)
             self.assertEqual(values['lon'], "")
 
@@ -172,7 +172,7 @@ class UtilTestDB(_BaseDBTest):
         """
 
         with self.app.app_context():
-            fields = get_fields(model.rvc_species.Sample, biodata.db.session)
+            fields = get_fields(model.rvc_species.Sample, self.session)
             expected = ['time', 'date', 'observer', 'site', 'speciesgroup']
             expected = set(expected)
             self.assertEqual(set(fields.keys()), expected)

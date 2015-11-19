@@ -6,8 +6,8 @@ from util import *
 basebp = Blueprint('/', 'BaseBlueprint', template_folder='templates')
 
 
-@basebp.route('/<datasetname>/<clsname>/delete/<int:id>')
-def delete(self, datasetname, cls, id):
+@basebp.route('/<datasetname>/<clsname>/delete/<int:id>', methods=["POST"])
+def delete(datasetname, clsname, id):
     obj = get_object(datasetname, clsname)
     inst = g.db.session.query(obj).get(id)
     g.db.session.delete(inst)
