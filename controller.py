@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, render_template, g, flash
 from biodata.model import datasets
 from sqlalchemy import or_, and_
 from util import *
+import wtforms
 
 basebp = Blueprint('/', 'BaseBlueprint', template_folder='templates')
 
@@ -73,3 +74,82 @@ def newsample(datasetname):
 @basebp.route("/<datasetname>/<clsname>/new", methods=["POST","GET"])
 def newclass(datasetname, clsname):
     pass
+
+def get_form(obj, orm, data = None, datadict = None):
+    """
+    Get the form for a new SQLAlchemy object.
+    
+    :param obj: The SQLAlchemy object to get the form for.
+    :param orm: The SQLALchemy session to use.
+    :param data: The a request-data wrapper object with which the form should 
+        be filled. Typically a Werkzeug/Django/WebOb MultiDict.
+    :param datadict: A dictionary type object with data for filling the form.
+    """
+    fields = get_fields(obj, orm)
+    fields['redirect'] = wtforms.HiddenField('redirect', value='list')
+    for pkey in get_primary_keys(obj):
+        fields[pkey] = wtforms.HiddenField(pkey)
+
+    class form(wtforms.Form):
+        pass
+    
+    for k, v in fields.items():
+        setattr(form, k, v)
+    
+    return form(formdata=data, data=datadict)
+
+
+def save(obj, orm, form):
+    """
+    Save an SQLAlchemy object after form submission.
+    
+    :param obj: The SQLAlchemy object to save.
+    :param orm: The SQLAlchemy session to save the object to.
+    :param form: The :class:`wtforms.Form` form to get the values from.
+    """
+
+    if not form.validate():
+        # Validation failed. Back to the form with the error message
+        retval = {'id': "%s_sample" % obj,
+                  'title': "Sample",
+                  'form': form,
+                  'action': web.url()}
+        return render_template('form.html', **retval)
+
+    store_values(obj, orm, form.data)
+
+    # handle the resulting redirection.
+    if 'HTTP_X_REQUESTED_WITH' in web.ctx.environ.keys():
+        # we're dealing with an ajax request
+        if form.redirect.data == 'form':
+            # back to the form with the same values 
+            # for the hidden (reference id) and dropdown fields
+            source = []
+            for field in form:
+                if isinstance(field, wtforms.SelectField)\
+                        or isinstance(field, wtforms.SelectMultiField)\
+                        or isinstance(field, wtforms.HiddenField):
+                    source.append((field.name, field.data))
+            source = dict(source)
+            form = get_form(obj, orm, datadict=source)
+            retval = {'form': form,
+                      'id': "%s_sample" % obj,
+                      'title': 'Sample',
+                      'action': web.url()}
+            return render_template('form.html', **retval)
+        else:
+            # show the added item
+            # return web.seeother('/%s'%inst.id)
+            log.debug('returning show page')
+            return web.seeother('/%s' % inst.id)
+    elif form.redirect.data == 'form':
+        # redirect to the form again, empty values in the form first
+        form = get_form(obj, orm)
+        retval = {'form': form,
+                  'id': "%s_sample" % obj,
+                  'title': 'Sample',
+                  'action': web.url()}
+        return render_template('form.html', **retval)
+    else:
+        #redirect to the list page
+        return web.seeother('/')

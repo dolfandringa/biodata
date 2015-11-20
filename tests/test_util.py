@@ -9,6 +9,7 @@ import tempfile
 import os
 from testmodel import TestSample, TestObservation, TestParticipant
 import types
+from collections import OrderedDict
 
 
 def isint(v):
@@ -175,6 +176,8 @@ class UtilTestDB(_BaseDBTest):
             fields = get_fields(model.rvc_species.Sample, self.session)
             expected = ['time', 'date', 'observer', 'site', 'speciesgroup']
             expected = set(expected)
+            
+            self.assertIsInstance(fields, OrderedDict)
             self.assertEqual(set(fields.keys()), expected)
             self.assertEqual(fields['observer'].html_attributes,
                              {'data-values_url': 'observer/'})

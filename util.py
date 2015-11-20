@@ -8,106 +8,53 @@ from collections import OrderedDict
 import decimal
 from flask import request
 
-def get_form(obj,orm):
-    fields=get_fields(obj,orm).values()
-    redirf=form.Hidden(name='redirect',value='list')
-    for pkey in get_primary_keys(obj):
-        fields.append(form.Hidden(name=pkey))
-    fields.append(redirf)
-    f = form.Form(*fields)()
-    defaults=dict([(i.name,i.value) for i in f.inputs])
-    source={}
-    listinputs={}
-    for field in fields:
-        if isinstance(field,form.Dropdown) and field.attrs.get('multiple',False)==True:
-            listinputs[field.name]=[]
-    for k,v in web.input(**listinputs).items():
-        #correct the values passed to the form
-        if isinstance(v,list):
-            #convert integers in a list of values to int values
-            v=[form.utils.intget(v2) or v2 for v2 in v]
-        else:
-            #convert integers to int values
-            v=form.utils.intget(v) or v
-        source[k]=v
-    defaults.update(source)
-    print(defaults)
-    f.fill(source=defaults)
-    return f
+def store_values(obj, orm, valuedict):
+    """
+    Store values for an object.
 
-
-def store_values(obj,orm):
-    f = get_form(obj,orm)
-    # make a dictionary of fieldname,[] combinations for all "multiple" dropdrowns
-    # so we give those the correct default value to web.input
-    # to get lists as values instead of a single value.
-    # see http://webpy.org/cookbook/input
-    listfields = dict([(field.name,[]) for field in f.inputs if isinstance(field,form.Dropdown) and field.attrs.get('multiple',False)])
-    source=dict([(k,form.utils.intget(v) or v) for k,v in web.input(**listfields).items()])
-    if not f.validates(source=source):
-        #Validation failed. Back to the form with the error message
-        ID = "%s_sample" % obj
-        TITLE = "Sample"
-        return render.form(f,ID,TITLE,web.url())
+    :param obj: The SQLAlchemy object for which the values need to be stored
+    :param orm: The SQLAlchemy session in which to store the values
+    :param valuedict: A dictionary like object containing the values to store.
+    """
+    f = valuedict # just for simplicity sake. I don't want to search/replace f
+    values = []
+    pkeys = get_primary_keys(obj)
+    for pkey in pkeys:
+        values.append((pkey, f[pkey] or None))
+    for col in get_simple_columns(obj):
+        # set the simple column values
+        values.append((col.name,f[col.name] or None))
+    for attr in get_relation_attributes(obj):
+        # get the relation attributes and set them.
+        target = attr.property.mapper.entity # target class
+        pkey = f[attr.key] # primary key value from the valuedict
+        val = orm.query(target).get(pkey) # get target instance from pkey
+        values.append((attr.key,val))
+    for attr in get_multi_relation_attributes(obj):
+        target = attr.property.mapper.entity # target class
+        vals=[]
+        for v in f[attr.key]:
+            val = orm.query(target).get(v) # get target instance from pkey
+            vals.append(val)
+        values.append((attr.key,vals))
+    values = OrderedDict(values)
+    if all([pkey in values.keys() for pkey in pkeys]):
+        #check if (all) primary keys have been defined,
+        #if so, fetch the instance from the database.
+        inst = orm.query(obj).get(tuple([values.get(pkey) for pkey in pkeys]))
     else:
-        #The form validated. Store the values in the db
-        values = []
-        pkeys = get_primary_keys(obj)
-        for pkey in pkeys:
-            values.append((pkey,f[pkey].value or None))
-        for col in get_simple_columns(obj):
-            #set the simple column values
-            values.append((col.name,f[col.name].value or None))
-        for attr in get_relation_attributes(obj):
-            #get the relation attributes and set them.
-            target = attr.property.mapper.entity #target class
-            pkey = f[attr.key].value #primary key value from the form
-            val = orm.query(target).get(pkey) #get target instance from pkey
-            values.append((attr.key,val))
-        for attr in get_multi_relation_attributes(obj):
-            target = attr.property.mapper.entity #target class
-            vals=[]
-            for v in f[attr.key].value:
-                val = orm.query(target).get(v) #get target instance from pkey
-                vals.append(val)
-            values.append((attr.key,vals))
-        values = OrderedDict(values)
-        if all([pkey in values.keys() for pkey in pkeys]):
-            #check if (all) primary keys have been defined,
-            #if so, fetch the instance from the database.
-            inst = orm.query(obj).get(tuple([values.get(pkey) for pkey in pkeys]))
+        #if not, create a new instance
+        inst = obj()
+    for k, v in values.items():
+        if isinstance(v, list):
+            setattr(inst, k, []) #empty the list first
+            for val in v:
+                getattr(inst, k).append(val)
         else:
-            #if not, create a new instance
-            inst = obj()
-        for k,v in values.items():
-            if isinstance(v,list):
-                setattr(inst,k,[]) #empty the list first
-                for val in v:
-                    getattr(inst,k).append(val)
-            else:
-                setattr(inst,k,v)
-        orm.add(inst)
-        orm.commit()
-        log.debug('changes committed')
-        #handle the resulting redirection.
-        if 'HTTP_X_REQUESTED_WITH' in web.ctx.environ.keys():
-            #we're dealing with an ajax request
-            if f['redirect'].value == 'form':
-                #back to the form with the same values.
-                f.fill(source=dict([(k.name,k.value) for k in f.inputs if isinstance(k,form.Dropdown) or isinstance(k,form.Hidden)]))
-                return render.form(f, "%s_sample" % obj, "Sample", web.url())
-            else:
-                #show the added item
-                #return web.seeother('/%s'%inst.id)
-                log.debug('returning show page');
-                return web.seeother('/%s'%inst.id)
-        elif f['redirect'].value == 'form':
-            #redirect to the form again, empty values in the form first
-            f.fill(source=dict([(k.name,None) for k in f.inputs]))
-            return render.form(f, "%s_sample" % obj, "Sample", web.url())
-        else:
-            #redirect to the list page
-            return web.seeother('/')
+            setattr(inst, k, v)
+    orm.add(inst)
+    orm.commit()
+
 
 def get_object(datasetname, classname):
     """
