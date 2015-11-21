@@ -1,7 +1,6 @@
-$def with (form,id,title,action)
 <html>
 <head>
-<title>$title</title>
+<title>{{ title }}</title>
 <script src="/static/scripts/jquery-1.11.2.min.js"></script>
 <link href="/static/css/select2.min.css" rel="stylesheet" />
 <link href="/static/css/styles.css" rel="stylesheet" />
@@ -15,15 +14,20 @@ $def with (form,id,title,action)
 </head>
 <body>
 <div>
-<form name="form_$id" method="post" action="$action"> 
-$if not form.valid: <p class="error">An error occured. Please try again.</p>
-$:form.render()
+{% from "_form_helpers.html" import render_field %}
+<form name="form_{{ id }}" method="post" {% if action is defined %}action="{{ action }} {% endif %}"> 
+	{% if form.errors %} <p class="error">An error occured. Please try again.</p> {% endif %}
+	<table>
+	{% for field in form %}
+		{{ render_field(field) }}
+	{% endfor %}
+	</table>
 </form>
-<button name="save" onclick="alert('test');jQuery('form[name=form_$id]').submit()">Save</button>
-<button name="save_new" onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_$id]').submit();">Save and New</button>
+<button name="save" onclick="alert('test');jQuery('form[name=form_{{ id }}]').submit()">Save</button>
+<button name="save_new" onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_{{ id }}]').submit();">Save and New</button>
 <script type='text/javascript'>
   jQuery(document).ready(function(){
-    jQuery("form[name=form_$id] select").select2();
+    jQuery("form[name=form_{{ id }}] select").select2();
   });
 </script>
 </div>

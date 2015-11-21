@@ -25,6 +25,22 @@ class ControllerTest(_BaseDBTest):
     def tearDown(self):
         _BaseDBTest.tearDown(self)
 
+    def test_form(self):
+        """
+        Test form display and operation.
+        """
+
+        self.fail("Test form display.")
+        self.fail("Test form submission with validation failures.")
+        self.fail("Test form user submission with destination is form. " +
+                  "User should be redirected to the form but all fields " +
+                  "should be emptied.")
+        self.fail("Test form ajax submission with destination is form. " +
+                  "User should be redirected to form with hidden " +
+                  "and select fields filled in but other fields empty.")
+        self.fail("Test user form submission with destination is list. " +
+                  "User should be redirected to the list page.")
+
     def test_list(self):
         """
         Test the list controller without selection parameters.

@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, render_template, g, flash
+from flask import redirect
 from biodata.model import datasets
 from sqlalchemy import or_, and_
 from util import *
@@ -66,43 +67,66 @@ def show(datasetname, clsname, id):
     return render_template('show.html', **retval)
 
 
-@basebp.route("/<datasetname>/new", methods=["POST","GET"])
+@basebp.route("/<datasetname>/new", methods=["POST", "GET"])
 def newsample(datasetname):
     pass
 
 
-@basebp.route("/<datasetname>/<clsname>/new", methods=["POST","GET"])
+@basebp.route("/<datasetname>/<clsname>/new", methods=["POST", "GET"])
 def newclass(datasetname, clsname):
-    pass
+    obj = get_object(datasetname, clsname)
+    if request.method == "GET":
+        form = get_form(obj, g.db.session)
+        retval = {'id': '%s_%s' % (datasetname, clsname),
+                  'title': '%s' % clsname,
+                  'form': form}
+        return render_template('form.html', **retval)
+    else:
+        form = get_form(obj, g.db.session, data=request.form)
+        save(obj, g.db.session, form)
 
-def get_form(obj, orm, data = None, datadict = None):
+
+def get_form(obj, orm, data=None, datadict=None):
     """
     Get the form for a new SQLAlchemy object.
-    
+
     :param obj: The SQLAlchemy object to get the form for.
     :param orm: The SQLALchemy session to use.
-    :param data: The a request-data wrapper object with which the form should 
+    :param data: The a request-data wrapper object with which the form should
         be filled. Typically a Werkzeug/Django/WebOb MultiDict.
     :param datadict: A dictionary type object with data for filling the form.
     """
     fields = get_fields(obj, orm)
-    fields['redirect'] = wtforms.HiddenField('redirect', value='list')
+    fields['redirect'] = wtforms.HiddenField('redirect')
     for pkey in get_primary_keys(obj):
         fields[pkey] = wtforms.HiddenField(pkey)
 
-    class form(wtforms.Form):
+    class formclass(wtforms.Form):
         pass
     
-    for k, v in fields.items():
-        setattr(form, k, v)
-    
-    return form(formdata=data, data=datadict)
+    for name, field in fields.items():
+        setattr(formclass, name, field)
+
+    if data is not None:
+        data.redirect = 'list'
+    elif datadict is not None:
+        datadict['redirect'] = 'list'
+    else:
+        datadict = {'redirect': 'list'}
+    form = formclass(formdata=data, data=datadict)
+
+    for name, field in fields.items():
+        # set html_attributes again as they got lost by formclass(...)
+        html_attributes = getattr(field, 'html_attributes', {})
+        getattr(form, name).html_attributes = html_attributes 
+
+    return form 
 
 
 def save(obj, orm, form):
     """
     Save an SQLAlchemy object after form submission.
-    
+
     :param obj: The SQLAlchemy object to save.
     :param orm: The SQLAlchemy session to save the object to.
     :param form: The :class:`wtforms.Form` form to get the values from.
@@ -112,17 +136,16 @@ def save(obj, orm, form):
         # Validation failed. Back to the form with the error message
         retval = {'id': "%s_sample" % obj,
                   'title': "Sample",
-                  'form': form,
-                  'action': web.url()}
+                  'form': form}
         return render_template('form.html', **retval)
 
     store_values(obj, orm, form.data)
 
     # handle the resulting redirection.
-    if 'HTTP_X_REQUESTED_WITH' in web.ctx.environ.keys():
+    if 'HTTP_X_REQUESTED_WITH' in request.header.keys():
         # we're dealing with an ajax request
         if form.redirect.data == 'form':
-            # back to the form with the same values 
+            # back to the form with the same values
             # for the hidden (reference id) and dropdown fields
             source = []
             for field in form:
@@ -134,22 +157,26 @@ def save(obj, orm, form):
             form = get_form(obj, orm, datadict=source)
             retval = {'form': form,
                       'id': "%s_sample" % obj,
-                      'title': 'Sample',
-                      'action': web.url()}
+                      'title': 'Sample'}
             return render_template('form.html', **retval)
         else:
             # show the added item
-            # return web.seeother('/%s'%inst.id)
-            log.debug('returning show page')
-            return web.seeother('/%s' % inst.id)
+            # return redirect('/%s'%inst.id)
+            args = {'id': inst.id,
+                    'dataset': request.view_args['dataset'],
+                    'clsname': request.view_args['clsname']
+                    }
+            return redirect(url_for('show', **args))
     elif form.redirect.data == 'form':
         # redirect to the form again, empty values in the form first
         form = get_form(obj, orm)
         retval = {'form': form,
                   'id': "%s_sample" % obj,
-                  'title': 'Sample',
-                  'action': web.url()}
+                  'title': 'Sample'}
         return render_template('form.html', **retval)
     else:
-        #redirect to the list page
-        return web.seeother('/')
+        # redirect to the list page
+        args = {'dataset': request.view_args['dataset'],
+                'clsname': request.view_args['clsname']
+                }
+        return redirect(url_for('/', **args))

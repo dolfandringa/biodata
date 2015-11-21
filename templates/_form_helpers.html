@@ -1,0 +1,14 @@
+{% macro render_field(field) %}
+{% if(field.widget.input_type!='hidden') %}
+  <tr><th><label for={{ field.name }}>{{ field.label }}</label></th>
+  <td>
+{% endif %}
+  {{ field(**field.html_attributes)|safe }}
+  {% if field.errors %}
+    <span class="error">{{ field.errors|join(", ") }}</span>
+  {% endif %}
+{% if(field.widget.input_type!='hidden') %}
+  </td>
+  </tr>
+{% endif %}
+{% endmacro %}

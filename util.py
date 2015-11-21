@@ -8,6 +8,7 @@ from collections import OrderedDict
 import decimal
 from flask import request
 
+
 def store_values(obj, orm, valuedict):
     """
     Store values for an object.
@@ -16,38 +17,38 @@ def store_values(obj, orm, valuedict):
     :param orm: The SQLAlchemy session in which to store the values
     :param valuedict: A dictionary like object containing the values to store.
     """
-    f = valuedict # just for simplicity sake. I don't want to search/replace f
+    f = valuedict  # just for simplicity sake. I don't want to search/replace f
     values = []
     pkeys = get_primary_keys(obj)
     for pkey in pkeys:
         values.append((pkey, f[pkey] or None))
     for col in get_simple_columns(obj):
         # set the simple column values
-        values.append((col.name,f[col.name] or None))
+        values.append((col.name, f[col.name] or None))
     for attr in get_relation_attributes(obj):
         # get the relation attributes and set them.
-        target = attr.property.mapper.entity # target class
-        pkey = f[attr.key] # primary key value from the valuedict
-        val = orm.query(target).get(pkey) # get target instance from pkey
-        values.append((attr.key,val))
+        target = attr.property.mapper.entity  # target class
+        pkey = f[attr.key]  # primary key value from the valuedict
+        val = orm.query(target).get(pkey)  # get target instance from pkey
+        values.append((attr.key, val))
     for attr in get_multi_relation_attributes(obj):
-        target = attr.property.mapper.entity # target class
-        vals=[]
+        target = attr.property.mapper.entity  # target class
+        vals = []
         for v in f[attr.key]:
-            val = orm.query(target).get(v) # get target instance from pkey
+            val = orm.query(target).get(v)  # get target instance from pkey
             vals.append(val)
-        values.append((attr.key,vals))
+        values.append((attr.key, vals))
     values = OrderedDict(values)
     if all([pkey in values.keys() for pkey in pkeys]):
-        #check if (all) primary keys have been defined,
-        #if so, fetch the instance from the database.
+        # check if (all) primary keys have been defined,
+        # if so, fetch the instance from the database.
         inst = orm.query(obj).get(tuple([values.get(pkey) for pkey in pkeys]))
     else:
-        #if not, create a new instance
+        # if not, create a new instance
         inst = obj()
     for k, v in values.items():
         if isinstance(v, list):
-            setattr(inst, k, []) #empty the list first
+            setattr(inst, k, [])  # empty the list first
             for val in v:
                 getattr(inst, k).append(val)
         else:
@@ -258,7 +259,7 @@ def get_fields(obj, orm):
             'args': [],
             'html_attributes': {'data-values_url': '%s/' % fname},
             'kwargs': {
-                'choices': [[(v.id, str(v)) for v in values]],
+                'choices': [(v.id, str(v)) for v in values],
                 'description':
                     "<a class='addlink' href='%s/new'>Add %s</a>" %
                     (fname, fname),
@@ -276,7 +277,7 @@ def get_fields(obj, orm):
             'args': [],
             'html_attributes': {'data-values_url': '%s/' % fname},
             'kwargs': {
-                'choices': [[(v.id, str(v)) for v in values]],
+                'choices': [(v.id, str(v)) for v in values],
                 'description':
                     "<a class='addlink' href='%s/new'>Add %s</a>" %
                     (fname, fname),
@@ -300,7 +301,7 @@ def get_fields(obj, orm):
 
     for k, v in fields.items():
         # instantiate the widgets
-        fields[k] = v['widget'](v['label'], *v['args'], **v['kwargs'])
+        fields[k] = v['widget'](v['label'], v['args'], **v['kwargs'])
         fields[k].html_attributes = v['html_attributes']
     fields.values()[0].html_attributes['autoFocus'] = True
 

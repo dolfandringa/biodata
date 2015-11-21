@@ -174,17 +174,29 @@ class UtilTestDB(_BaseDBTest):
 
         with self.app.app_context():
             fields = get_fields(model.rvc_species.Sample, self.session)
+
+            class testForm(wtforms.Form):
+                pass
+            
             expected = ['time', 'date', 'observer', 'site', 'speciesgroup']
             expected = set(expected)
-            
+
             self.assertIsInstance(fields, OrderedDict)
             self.assertEqual(set(fields.keys()), expected)
+
             self.assertEqual(fields['observer'].html_attributes,
                              {'data-values_url': 'observer/'})
             self.assertEqual(fields.values()[0], fields['site'])
             self.assertEqual(fields['site'].html_attributes,
                              {'autoFocus': True, 'data-values_url': 'site/'})
-            # We can't use assertIsInstance because the fields are unbound
-            self.assertEqual(fields['site'].field_class, wtforms.SelectField)
-            self.assertEqual(fields['observer'].field_class,
-                             wtforms.SelectMultipleField)
+            
+            form = testForm()
+            for label, field in fields.items():
+                fields[label] = field.bind(form, label)
+                self.assertTrue(hasattr(field, 'html_attributes'))
+            
+            self.assertIsInstance(fields['site'], wtforms.SelectField)
+            self.assertIsInstance(fields['observer'], 
+                                  wtforms.SelectMultipleField)
+            self.assertTrue(hasattr(fields['date'].validators, '__iter__'))
+
