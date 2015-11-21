@@ -3,7 +3,7 @@
   <tr><th><label for={{ field.name }}>{{ field.label }}</label></th>
   <td>
 {% endif %}
-  {{ field(**field.html_attributes)|safe }}
+  {{ field(**field.html_attributes)|safe }} {{ field.description|safe }}
   {% if field.errors %}
     <span class="error">{{ field.errors|join(", ") }}</span>
   {% endif %}

@@ -17,6 +17,7 @@ def delete(datasetname, clsname, id):
     return jsonify({'success': True})
 
 
+@basebp.route('/<datasetname>/<clsname>/list')
 @basebp.route('/<datasetname>/<clsname>/')
 def index(datasetname, clsname):
     params = []
@@ -163,10 +164,10 @@ def save(obj, orm, form):
             # show the added item
             # return redirect('/%s'%inst.id)
             args = {'id': inst.id,
-                    'dataset': request.view_args['dataset'],
+                    'datasetname': request.view_args['dataset'],
                     'clsname': request.view_args['clsname']
                     }
-            return redirect(url_for('show', **args))
+            return redirect(url_for('.show', **args))
     elif form.redirect.data == 'form':
         # redirect to the form again, empty values in the form first
         form = get_form(obj, orm)
@@ -176,7 +177,7 @@ def save(obj, orm, form):
         return render_template('form.html', **retval)
     else:
         # redirect to the list page
-        args = {'dataset': request.view_args['dataset'],
+        args = {'datasetname': request.view_args['dataset'],
                 'clsname': request.view_args['clsname']
                 }
-        return redirect(url_for('/', **args))
+        return redirect(url_for('.index', **args))

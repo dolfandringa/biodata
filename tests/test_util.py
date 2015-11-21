@@ -173,7 +173,8 @@ class UtilTestDB(_BaseDBTest):
         """
 
         with self.app.app_context():
-            fields = get_fields(model.rvc_species.Sample, self.session)
+            with self.app.test_request_context('/'):
+                fields = get_fields(model.rvc_species.Sample, self.session)
 
             class testForm(wtforms.Form):
                 pass
@@ -185,10 +186,11 @@ class UtilTestDB(_BaseDBTest):
             self.assertEqual(set(fields.keys()), expected)
 
             self.assertEqual(fields['observer'].html_attributes,
-                             {'data-values_url': 'observer/'})
+                             {'data-values_url': '/rvc_species/observer/'})
             self.assertEqual(fields.values()[0], fields['site'])
             self.assertEqual(fields['site'].html_attributes,
-                             {'autoFocus': True, 'data-values_url': 'site/'})
+                             {'autoFocus': True,
+                              'data-values_url': '/rvc_species/site/'})
             
             form = testForm()
             for label, field in fields.items():

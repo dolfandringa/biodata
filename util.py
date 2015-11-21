@@ -6,7 +6,7 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.properties import RelationshipProperty, ColumnProperty
 from collections import OrderedDict
 import decimal
-from flask import request
+from flask import request, url_for
 
 
 def store_values(obj, orm, valuedict):
@@ -245,7 +245,8 @@ def get_fields(obj, orm):
     It maps SQLAlchemy attributes to wtform fields, taking relationship
     attributes (one-to-many and many-to-many) into account.
     """
-
+    datasetname = obj.__module__.split('.')[-1]
+    clsname = obj.__name__
     fields = OrderedDict()
     for attr in get_relation_attributes(obj):
         # turn foreign keys into dropdowns with the id as value
@@ -253,16 +254,19 @@ def get_fields(obj, orm):
         target = attr.property.mapper.entity
         values = orm.query(target).all()
         fname = getattr(target, 'pretty_name', attr.key)
+        args = {'datasetname': datasetname, 'clsname': fname}
+        data_url = url_for('/.index', **args)
+        new_url = url_for('/.newclass', **args)
         fields[fname] = {
             'widget': wtforms.SelectField,
             'label': fname,
             'args': [],
-            'html_attributes': {'data-values_url': '%s/' % fname},
+            'html_attributes': {'data-values_url': '%s' % data_url},
             'kwargs': {
                 'choices': [(v.id, str(v)) for v in values],
                 'description':
-                    "<a class='addlink' href='%s/new'>Add %s</a>" %
-                    (fname, fname),
+                    "<a class='addlink' href='%s'>Add %s</a>" %
+                    (new_url, fname),
                 }}
     for attr in get_multi_relation_attributes(obj):
         # turn foreign keys for many-to-many relations into dropdowns
@@ -271,16 +275,19 @@ def get_fields(obj, orm):
         target = attr.property.mapper.entity
         values = orm.query(target).all()
         fname = getattr(target, 'pretty_name', target.__name__)
+        args = {'datasetname': unicode(datasetname), 'clsname': unicode(fname)}
+        data_url = url_for('/.index', **args)
+        new_url = url_for('/.newclass', **args)
         fields[fname] = {
             'widget': wtforms.SelectMultipleField,
             'label': attr.key,
             'args': [],
-            'html_attributes': {'data-values_url': '%s/' % fname},
+            'html_attributes': {'data-values_url': '%s' % data_url},
             'kwargs': {
                 'choices': [(v.id, str(v)) for v in values],
                 'description':
-                    "<a class='addlink' href='%s/new'>Add %s</a>" %
-                    (fname, fname),
+                    "<a class='addlink' href='%s'>Add %s</a>" %
+                    (new_url, fname),
                 }}
     for c in get_simple_columns(obj):
         # map the form widgets by the SQLAlchemy column type
