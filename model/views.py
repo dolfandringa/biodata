@@ -59,7 +59,7 @@ views={
          LEFT JOIN base_species ON base_species.id = random_swim_species_observation.species_id
       ORDER BY base_sample.date, base_sample.id, base_observer.id;""",
       
-      'random_swim_species_sites':"""SELECT base_site.name AS site,
+    'random_swim_species_sites':"""SELECT base_site.name AS site,
         base_site.barangay,
         base_site.municipality,
         count(DISTINCT base_sample.id) AS number_of_samples
@@ -68,7 +68,7 @@ views={
          LEFT JOIN base_site ON base_sample.site_id = base_site.id
       GROUP BY base_site.id, base_site.name, base_site.barangay, base_site.municipality;""",
       
-      'rvc_species_observations':"""SELECT base_sample.id AS sample_id,
+    'rvc_species_observations':"""SELECT base_sample.id AS sample_id,
         base_observation.id AS observation_id,
         base_site.name AS site,
         base_site.barangay,
@@ -108,4 +108,62 @@ views={
          LEFT JOIN base_site ON base_sample.site_id = base_site.id
       GROUP BY base_site.id, base_site.name, base_site.barangay, base_site.municipality, rvc_species_speciesgroup.name;""",
       
+    'small_samples':"""SELECT 
+            *
+        FROM
+        (SELECT count(base_observation.id) as num_observations,
+            max(count(base_observation.id)) OVER (PARTITION BY base_sample.id) as max_observations_sample,
+            base_sample.id as sample_id,
+            base_sample.date,
+            base_sample."time",
+            base_site.name as site,
+            base_observer.name as observer,
+            array_agg(distinct participants.name) as participants,
+            rvc_species_speciesgroup.name as species_group,
+            base_observation.dataset
+           FROM base_sample
+           LEFT JOIN sample_participants ON base_sample.id=sample_participants.sample_id
+           LEFT JOIN base_observation ON base_observation.sample_id=base_sample.id
+           LEFT JOIN rvc_species_observation ON (base_observation.id=rvc_species_observation.id)
+           LEFT JOIN rvc_species_sample ON rvc_species_sample.id=base_sample.id
+           LEFT JOIN base_observer ON base_observer.id=base_observation.observer_id
+           LEFT JOIN base_observer as participants ON participants.id=sample_participants.observer_id
+           LEFT JOIN base_site ON base_sample.site_id = base_site.id
+           LEFT JOIN rvc_species_speciesgroup ON rvc_species_speciesgroup.id=rvc_species_sample.species_group_id
+        GROUP BY base_sample.id,date,time,site, base_observation.dataset, observer, species_group) s
+        WHERE max_observations_sample<12""",
+    
+    'duplicate_observations': """SELECT s.sample_id,
+            base_sample.date,
+            base_site.name AS site,
+            base_observer.name AS observer,
+            base_species.common_name AS species,
+            s.species_id,
+            s.score_0_9,
+            s.score_10_19,
+            s.score_20_29,
+            s.score_30_39,
+            s.score_40_49,
+            s.num_occurence,
+            s.num_identical_occurence,
+            s.observation_id
+           FROM ( SELECT base_observation.sample_id,
+                    base_observation.observer_id,
+                    rvc_species_observation.species_id,
+                    rvc_species_observation.score_0_9,
+                    rvc_species_observation.score_10_19,
+                    rvc_species_observation.score_20_29,
+                    rvc_species_observation.score_30_39,
+                    rvc_species_observation.score_40_49,
+                    rvc_species_observation.id AS observation_id,
+                    count(rvc_species_observation.id) OVER (PARTITION BY rvc_species_observation.species_id, base_observation.sample_id, base_observation.observer_id) AS num_occurence,
+                    count(rvc_species_observation.id) OVER (PARTITION BY rvc_species_observation.species_id, base_observation.sample_id, base_observation.observer_id, rvc_species_observation.score_0_9, rvc_species_observation.score_10_19, rvc_species_observation.score_20_29, rvc_species_observation.score_30_39, rvc_species_observation.score_40_49) AS num_identical_occurence
+                   FROM rvc_species_observation
+                     LEFT JOIN base_observation USING (id)) s
+             LEFT JOIN base_sample ON s.sample_id = base_sample.id
+             LEFT JOIN base_species ON s.species_id = base_species.id
+             LEFT JOIN base_observer ON s.observer_id = base_observer.id
+             LEFT JOIN base_site ON base_sample.site_id = base_site.id
+          WHERE s.num_occurence > 1
+          ORDER BY s.sample_id, s.observer_id""",
   }
