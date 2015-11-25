@@ -39,7 +39,9 @@ def store_values(obj, orm, valuedict):
             vals.append(val)
         values.append((attr.key, vals))
     values = OrderedDict(values)
-    if all([pkey in values.keys() for pkey in pkeys]):
+
+    if all([pkey in values.keys() and values[pkey] is not None
+            for pkey in pkeys]):
         # check if (all) primary keys have been defined,
         # if so, fetch the instance from the database.
         inst = orm.query(obj).get(tuple([values.get(pkey) for pkey in pkeys]))
@@ -55,6 +57,7 @@ def store_values(obj, orm, valuedict):
             setattr(inst, k, v)
     orm.add(inst)
     orm.commit()
+    return inst
 
 
 def get_object(datasetname, classname):
@@ -125,6 +128,8 @@ def map_column_type(c):
 
     if not c.nullable:
         args.append(wtforms.validators.InputRequired())
+    else:
+        args.append(wtforms.validators.Optional())
     kwargs = field.get('kwargs', {})
     html_attributes = field.get('html_attributes', {})
     return {'widget': field['widget'], 'label': c.name, 'args': args,
@@ -264,6 +269,7 @@ def get_fields(obj, orm):
             'html_attributes': {'data-values_url': '%s' % data_url},
             'kwargs': {
                 'choices': [(v.id, str(v)) for v in values],
+                'coerce': int,
                 'description':
                     "<a class='addlink' href='%s'>Add %s</a>" %
                     (new_url, fname),
@@ -285,6 +291,7 @@ def get_fields(obj, orm):
             'html_attributes': {'data-values_url': '%s' % data_url},
             'kwargs': {
                 'choices': [(v.id, str(v)) for v in values],
+                'coerce': int,
                 'description':
                     "<a class='addlink' href='%s'>Add %s</a>" %
                     (new_url, fname),
@@ -305,9 +312,11 @@ def get_fields(obj, orm):
             widget = v.get('widget', field.get('widget'))
             valuefunc = v.get('valuefunc', field.get('valuefunc', None))
             if widget != wtforms.SelectField and \
-                    widget != wtforms.SelectMultipleField and \
-                    'choices' in kwargs.keys():
-                del(kwargs['choices'])
+                    widget != wtforms.SelectMultipleField:
+                if 'choices' in kwargs.keys():
+                    del(kwargs['choices'])
+                if 'coerce' in kwargs.keys():
+                    del(kwargs['coerce'])
             html_attributes = v.get('html_attributes',
                                     field.get('html_attributes', {}))
             fields[k] = {'label': k, 'widget': widget,

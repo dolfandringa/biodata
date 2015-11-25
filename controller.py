@@ -21,6 +21,12 @@ def delete(datasetname, clsname, id):
 @basebp.route('/<datasetname>/<clsname>/list')
 @basebp.route('/<datasetname>/<clsname>/')
 def index(datasetname, clsname):
+    """
+    Show a list of all instances of the object/dataset combination.
+
+    :param datasetname: The name of the dataset to fetch the instances for.
+    :param clsname: The name of the class to fetch the instances for.
+    """
     params = []
     obj = get_object(datasetname, clsname)
     for k in request.args.keys():
@@ -85,7 +91,7 @@ def newclass(datasetname, clsname):
         return render_template('form.html', **retval)
     else:
         form = get_form(obj, g.db.session, data=request.form)
-        save(obj, g.db.session, form)
+        return save(obj, g.db.session, form)
 
 
 def get_form(obj, orm, data=None):
@@ -112,9 +118,8 @@ def get_form(obj, orm, data=None):
         data = MultiDict()
     elif isinstance(data, ImmutableMultiDict):
         data = data.copy()
-    data['redirect'] = 'list'
+    data['redirect'] = data.get('redirect','list')
     
-    print("Data: %s" % data)
     form = formclass(formdata=data)
 
     for name, field in fields.items():
@@ -138,6 +143,7 @@ def save(obj, orm, form):
 
     clsname = request.view_args['clsname']
     datasetname = request.view_args['datasetname']
+    print(form.data)
     if not form.validate():
         # Validation failed. Back to the form with the error message
         retval = {'id': "%s_%s" % (datasetname, clsname),
@@ -145,9 +151,10 @@ def save(obj, orm, form):
                   'form': form}
         return render_template('form.html', **retval)
 
-    store_values(obj, orm, form.data)
+    inst = store_values(obj, orm, form.data)
     # handle the resulting redirection.
-    if 'HTTP_X_REQUESTED_WITH' in request.header.keys():
+    print(request.headers.items())
+    if 'http-x-requested-with' in [k.lower() for k in request.headers.keys()]:
         # we're dealing with an ajax request
         if form.redirect.data == 'form':
             # back to the form with the same values
@@ -155,11 +162,11 @@ def save(obj, orm, form):
             source = []
             for field in form:
                 if isinstance(field, wtforms.SelectField)\
-                        or isinstance(field, wtforms.SelectMultiField)\
+                        or isinstance(field, wtforms.SelectMultipleField)\
                         or isinstance(field, wtforms.HiddenField):
                     source.append((field.name, field.data))
-            source = dict(source)
-            form = get_form(obj, orm, datadict=source)
+            source = MultiDict(source)
+            form = get_form(obj, orm, data=source)
             retval = {'form': form,
                       'id': "%s" % clsname,
                       'title': 'New %s' % clsname.capitalize()}
@@ -172,9 +179,9 @@ def save(obj, orm, form):
                     'clsname': clsname
                     }
             return redirect(url_for('.show', **args))
-    elif form.redirect.data == 'form':
+    elif form.redirect.data == u'form':
         # redirect to the form again, empty values in the form first
-        form = get_form(obj, orm)
+        form = get_form(obj, orm, data=MultiDict({'redirect': 'form'}))
         retval = {'form': form,
                   'id': "%s" % clsname,
                   'title': 'New %s' % clsname.capitalize()}

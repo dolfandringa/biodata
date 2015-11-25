@@ -7,6 +7,8 @@ import re
 import lxml
 from pyquery import PyQuery as pq
 import json
+import datetime
+from werkzeug.datastructures import MultiDict
 
 curdir = os.path.dirname(os.path.abspath(__file__))
 
@@ -51,15 +53,92 @@ class ControllerTest(_BaseDBTest):
                 # remove whitespace at the beginning of a line
                 expected = re.sub(self.whitespace_re, "", expected)
                 self.assertMultiLineEqual(expected, result)
-        self.fail("Test form submission with validation failures.")
-        self.fail("Test form user submission with destination is form. " +
-                  "User should be redirected to the form but all fields " +
-                  "should be emptied.")
-        self.fail("Test form ajax submission with destination is form. " +
-                  "User should be redirected to form with hidden " +
-                  "and select fields filled in but other fields empty.")
-        self.fail("Test user form submission with destination is list. " +
-                  "User should be redirected to the list page.")
+    
+    def test_form_submission_error(self):
+        """
+        Testing if submitting an empty form results in validation errors.
+        """
+
+        data = {}
+        response = self.client.post('/rvc_species/observer/new', data=data)
+        self.assertEqual(response.status_code, 200)
+        d = pq(response.get_data(as_text=True))
+        self.assertEqual(len(d(".error")), 2)
+    
+    def test_form_submission_redirect(self):
+        """
+        Add an observer and test if it gets stored. Also check if the result
+        is a redirect to the list page.
+        """
+        
+        data = {'name': 'dolftest'}
+        response = self.client.post('/rvc_species/observer/new', data=data,
+                                    follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        with self.app.app_context():
+            observers = self.session.query(model.rvc_species.Observer).all()
+            self.assertEqual(len(observers), 3)
+        
+        response = self.client.post('/rvc_species/observer/new', data=data,
+                                    follow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.location, 
+                         'http://localhost/rvc_species/observer/')
+
+    def test_form_submission_form(self):
+        """
+        Test if adding redirect=form to the data results in the user being
+        shown an empty form again with the redirect value preserved.
+        """        
+        data = {'name': 'dolftest', 'redirect': 'form'}
+        response = self.client.post('/rvc_species/observer/new', data=data,
+                                    follow_redirects=False)
+        self.assertEqual(response.status_code, 200)
+        result = response.get_data(as_text=True) 
+        print(result)
+        d = pq(result)
+        self.assertEqual(len(d(".error")), 0)
+        self.assertEqual(d("input#name").attr.value, '')
+        self.assertEqual(d("input#id").attr.value, '')
+        self.assertEqual(d("input#redirect").attr.value, 'form')
+
+    def test_form_submission_ajax(self):
+        """
+        Test form submission from AJAX and value storage.
+        Test while using many-to-many and many-to-one relationships
+        and date and datetime fields.
+        """
+        data = [('site', '1'),
+                ('participants', '1'),
+                ('participants', '2'),
+                ('speciesgroup', '1'),
+                ('date', '2015-01-01'),
+                ]
+        data = MultiDict(data)
+        headers = [('HTTP_X_REQUESTED_WITH','')]
+        response = self.client.post('/rvc_species/sample/new', data=data,
+                                    headers=headers, follow_redirects=False)
+        print(response.get_data(as_text=True))
+        self.assertEqual(response.status_code,302)
+        self.assertEqual(response.location,
+                         'http://localhost/rvc_species/sample/3')
+        with self.app.app_context():
+            query = self.session.query(model.rvc_species.Sample)
+            samples = query.all()
+            self.assertEqual(len(samples), 3)
+            sample = query.get(3)
+            self.assertEqual(sample.date, datetime.date(2015,01,01))
+            site = self.session.query(model.rvc_species.Site).get(1)
+            self.assertEqual(sample.site, site)
+            query = self.session.query(model.rvc_species.Observer)
+            participants = [query.get(1), query.get(2)]
+            self.assertEqual(sample.participants, participants)
+            
+
+    def test_master_form(self):
+        """
+        Test the /rvc_species/new form.
+        """
         self.fail("/rvc_species/new not tested yet. " +
                   "(see continue statement on line 40)")
 
