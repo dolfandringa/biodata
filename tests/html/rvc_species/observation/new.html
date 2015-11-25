@@ -18,31 +18,15 @@
 <table>
     <tr>
     	<th><label for="observer">observer</label></th>
-    	<td><select autoFocus="True" data-values_url="observer/" name="observer" id="observer">
-  <option value="1">dolf</option>
-  <option value="2">annelies</option>
-</select>
-<a class='addlink' href='observer/new'>Add observer</a></td>
+    	<td><select autoFocus data-values_url="/rvc_species/observer/" id="observer" name="observer"><option value="1">dolf</option><option value="2">annelies</option></select><a class='addlink' href='/rvc_species/observer/new'>Add observer</a></td>
 	</tr>
     <tr style="display: none;">
-    	<th></th>
-    	<td><input data-values_url="sample/" type="hidden" id="sample" name="sample"/><a class='addlink' href='sample/new'>Add sample</a></td>
+    	<th><label for="sample">sample</label></th>
+    	<td><input data-values_url="/rvc_species/sample/" id="sample" name="sample" type="hidden" value="25"><a class='addlink' href='/rvc_species/sample/new'>Add sample</a></td>
 	</tr>
     <tr>
     	<th><label for="species">species</label></th>
-    	<td><select data-values_url="species/" id="species" name="species">
-  <option value="1">com0</option>
-  <option value="2">com1</option>
-  <option value="3">com2</option>
-  <option value="4">com3</option>
-  <option value="5">com4</option>
-  <option value="6">com5</option>
-  <option value="7">com6</option>
-  <option value="8">com7</option>
-  <option value="9">com8</option>
-  <option value="10">com9</option>
-</select>
-<a class='addlink' href='species/new'>Add species</a></td>
+    	<td><select data-values_url="/rvc_species/species/" id="species" name="species"><option value="1">com0</option><option value="2">com1</option><option value="3">com2</option><option value="4">com3</option><option value="5">com4</option><option value="6">com5</option><option value="7">com6</option><option value="8">com7</option><option value="9">com8</option><option value="10">com9</option></select><a class='addlink' href='/rvc_species/species/new'>Add species</a></td>
 	</tr>
     <tr>
     	<th><label for="comments">comments</label></th>
@@ -74,7 +58,7 @@
     </tr>
     <tr style="display: none;">
     	<th><label for="id">id</label></th>
-    	<td><input id="id" name="redirect" type="hidden" value=""></td>
+    	<td><input id="id" name="id" type="hidden" value=""></td>
     </tr>
 </table>
 </form>

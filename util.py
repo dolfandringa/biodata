@@ -278,7 +278,7 @@ def get_fields(obj, orm):
         args = {'datasetname': unicode(datasetname), 'clsname': unicode(fname)}
         data_url = url_for('/.index', **args)
         new_url = url_for('/.newclass', **args)
-        fields[fname] = {
+        fields[attr.key] = {
             'widget': wtforms.SelectMultipleField,
             'label': attr.key,
             'args': [],
@@ -303,13 +303,25 @@ def get_fields(obj, orm):
             kwargs = field.get('kwargs', {})
             kwargs.update(v.get('kwargs', {}))
             widget = v.get('widget', field.get('widget'))
+            valuefunc = v.get('valuefunc', field.get('valuefunc', None))
+            if widget != wtforms.SelectField and \
+                    widget != wtforms.SelectMultipleField and \
+                    'choices' in kwargs.keys():
+                del(kwargs['choices'])
+            html_attributes = v.get('html_attributes',
+                                    field.get('html_attributes', {}))
             fields[k] = {'label': k, 'widget': widget,
-                         'args': args, 'kwargs': kwargs}
+                         'args': args, 'kwargs': kwargs,
+                         'html_attributes': html_attributes}
+            if valuefunc is not None:
+                fields[k]['valuefunc'] = valuefunc
 
     for k, v in fields.items():
         # instantiate the widgets
         fields[k] = v['widget'](v['label'], v['args'], **v['kwargs'])
         fields[k].html_attributes = v['html_attributes']
+        if 'valuefunc' in v.keys():
+            fields[k].valuefunc = v['valuefunc']
     fields.values()[0].html_attributes['autoFocus'] = True
 
     return fields

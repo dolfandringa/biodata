@@ -18,49 +18,31 @@
 <table>
     <tr>
     	<th><label for="site">site</label></th>
-    	<td>
-    		<select autoFocus="True" data-values_url="site/" name="site" id="site">
-  <option value="1">guinsuan, , </option>
-</select>
-<a class='addlink' href='site/new'>Add site</a>
-		</td>
+    	<td><select autoFocus data-values_url="/rvc_species/site/" id="site" name="site"><option value="1">guinsuan, , </option></select><a class='addlink' href='/rvc_species/site/new'>Add site</a></td>
 	</tr>
     <tr>
     	<th><label for="speciesgroup">speciesgroup</label></th>
-    	<td>
-    		<select data-values_url="speciesgroup/" id="speciesgroup" name="speciesgroup">
-  <option value="1">TestSpecGroup</option>
-</select>
-<a class='addlink' href='speciesgroup/new'>Add speciesgroup</a>
-		</td>
+    	<td><select data-values_url="/rvc_species/speciesgroup/" id="speciesgroup" name="speciesgroup"><option value="1">TestSpecGroup</option></select><a class='addlink' href='/rvc_species/speciesgroup/new'>Add speciesgroup</a></td>
 	</tr>
     <tr>
     	<th><label for="participants">participants</label></th>
-    	<td>
-    		<select data-values_url="observer/" multiple="True" id="participants" name="participants">
-  <option value="1">dolf</option>
-  <option value="2">annelies</option>
-</select>
-<a class='addlink' href='observer/new'>Add observer</a>
-		</td>
+    	<td><select data-values_url="/rvc_species/observer/" id="participants" multiple name="participants"><option value="1">dolf</option><option value="2">annelies</option></select><a class='addlink' href='/rvc_species/observer/new'>Add observer</a></td>
 	</tr>
     <tr>
     	<th><label for="date">date</label></th>
-    	<td>
-    		<input type="text" id="date" name="date"> format: YYYY-MM-DD
-    	</td>
+    	<td><input id="date" name="date" type="text" value=""> format: YYYY-MM-DD</td>
     </tr>
     <tr>
     	<th><label for="time">time</label></th>
-    	<td>
-    		<input type="text" id="time" name="time"> format: HH:MM
-    	</td>
+    	<td><input id="time" name="time" type="text" value=""> format: HH:MM</td>
     </tr>
     <tr style="display: none;">
-    	<th></th>
-    	<td>
-    		<input type="hidden" id="redirect" value="list" name="redirect">
-    	</td>
+    	<th><label for="redirect">redirect</label></th>
+    	<td><input id="redirect" name="redirect" type="hidden" value="list"></td>
+    </tr>
+    <tr style="display: none;">
+    	<th><label for="id">id</label></th>
+    	<td><input id="id" name="id" type="hidden" value=""></td>
     </tr>
 </table>
 </form>

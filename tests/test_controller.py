@@ -38,6 +38,8 @@ class ControllerTest(_BaseDBTest):
                 endpt = "%s/new" % base.split(os.path.join(curdir, 'html'))[-1]
                 if endpt == "/rvc_species/new":
                     continue
+                if endpt == "/rvc_species/observation/new":
+                    endpt = "%s?sample=25" % endpt
                 print("Fetching %s" % endpt)
                 response = self.client.get(endpt)
                 self.assertEqual(response.status_code, 200)

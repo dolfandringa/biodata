@@ -166,4 +166,22 @@ views={
              LEFT JOIN base_site ON base_sample.site_id = base_site.id
           WHERE s.num_occurence > 1
           ORDER BY s.sample_id, s.observer_id""",
+    
+    'rvc_species_samples':""" 
+         SELECT
+            base_sample.id as sample_id,
+            base_site.id as site_id,
+            base_site.name AS site,
+            base_sample.date,
+            base_sample."time",
+            rvc_species_speciesgroup.name AS species_group,
+            array_agg(DISTINCT participants.name) AS participants
+           FROM rvc_species_sample
+             LEFT JOIN rvc_species_speciesgroup ON rvc_species_sample.species_group_id = rvc_species_speciesgroup.id
+             LEFT JOIN base_sample ON base_sample.id = rvc_species_sample.id
+             LEFT JOIN base_site ON base_sample.site_id = base_site.id
+             LEFT JOIN sample_participants ON sample_participants.sample_id = base_sample.id
+             LEFT JOIN base_observer participants ON sample_participants.observer_id = participants.id
+          GROUP BY base_site.id, base_site.name, rvc_species_speciesgroup.name, base_sample.id, base_sample.date, base_sample."time"
+          ORDER BY base_sample.date, base_sample."time", rvc_species_speciesgroup.name, base_site.name""",
   }

@@ -90,8 +90,8 @@ class UtilTest(_BaseTest):
         """Test getting the simple columns of an SQLAlchemy object"""
 
         cols = list(get_simple_columns(TestSample))
-        self.assertEqual(len(cols), 3)
-        expected = set([u'date', u'time', u'name'])
+        self.assertEqual(len(cols), 4)
+        expected = set([u'date', u'time', u'name', u'hiddenname'])
         self.assertEqual(set([c.key for c in cols]), expected)
 
     def test_get_relation_attributes(self):
@@ -129,9 +129,9 @@ class UtilTest(_BaseTest):
         self.assertEqual(set([a.key for a in attrs]), properties)
         attrs = get_data_attributes(TestSample)
         attrs = list(attrs)
-        self.assertEqual(len(attrs), 6)
+        self.assertEqual(len(attrs), 7)
         properties = set(['id', 'date', 'time', 'name',
-                          'observations', 'participants'])
+                          'observations', 'participants', 'hiddenname'])
         self.assertEqual(set([a.key for a in attrs]), properties)
 
 
@@ -172,20 +172,21 @@ class UtilTestDB(_BaseDBTest):
         correct loading of the wtforms fields for each SQLAlchemy column.
         """
 
+        sess = self.session
         with self.app.app_context():
             with self.app.test_request_context('/'):
-                fields = get_fields(model.rvc_species.Sample, self.session)
+                fields = get_fields(model.rvc_species.Sample, sess)
 
             class testForm(wtforms.Form):
                 pass
             
-            expected = ['time', 'date', 'observer', 'site', 'speciesgroup']
+            expected = ['time', 'date', 'participants', 'site', 'speciesgroup']
             expected = set(expected)
 
             self.assertIsInstance(fields, OrderedDict)
             self.assertEqual(set(fields.keys()), expected)
 
-            self.assertEqual(fields['observer'].html_attributes,
+            self.assertEqual(fields['participants'].html_attributes,
                              {'data-values_url': '/rvc_species/observer/'})
             self.assertEqual(fields.values()[0], fields['site'])
             self.assertEqual(fields['site'].html_attributes,
@@ -198,7 +199,23 @@ class UtilTestDB(_BaseDBTest):
                 self.assertTrue(hasattr(field, 'html_attributes'))
             
             self.assertIsInstance(fields['site'], wtforms.SelectField)
-            self.assertIsInstance(fields['observer'], 
+            self.assertIsInstance(fields['participants'], 
                                   wtforms.SelectMultipleField)
             self.assertTrue(hasattr(fields['date'].validators, '__iter__'))
+            
+            with self.app.test_request_context('/'):
+                fields = get_fields(model.rvc_species.Observation, sess)
 
+            expected = set(['comments', 'observer', 'sample', 'score_0_9',
+                        'score_10_19', 'score_20_29', 'score_30_39',
+                        'score_40_49', 'species'])
+            self.assertEqual(set(fields.keys()), expected)
+            
+            self.assertTrue(hasattr(fields['sample'].valuefunc,'__call__'))
+            self.assertFalse('choices' in fields['sample'].kwargs)
+            form = testForm()
+            for label, field in fields.items():
+                fields[label] = field.bind(form, label)
+            
+            self.assertIsInstance(fields['sample'], wtforms.HiddenField)
+            

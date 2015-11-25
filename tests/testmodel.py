@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import biodata
 import datetime
+import wtforms
 
 Base = declarative_base()
 
@@ -19,13 +20,21 @@ class TestParticipant(Base):
 
 class TestSample(Base):
     __tablename__ = 'testsample'
+    formfields = {}
     id = Column(Integer, primary_key=True)
     date = Column(Date, nullable=False)
     time = Column(Time, nullable=True)
+    hiddentime = Column(Integer)
     name = Column(Unicode, nullable=False)
+    hiddenname = Column(Unicode, nullable=False)
     participants = relationship("TestParticipant",
                         secondary=sample_participants,
                         backref="testsamples")
+    formfields['hiddentime'] = {'skip':True}
+    formfields['hiddenname']={  'widget':wtforms.HiddenField,
+                                'valuefunc':lambda x: x.sample.id,
+                                'args':[],
+                                'kwargs':{}}
     
 class TestObservation(Base):
     __tablename__ = 'testobservation'

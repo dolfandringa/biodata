@@ -4,6 +4,7 @@ from biodata.model import datasets
 from sqlalchemy import or_, and_
 from util import *
 import wtforms
+from werkzeug.datastructures import MultiDict, ImmutableMultiDict
 
 basebp = Blueprint('/', 'BaseBlueprint', template_folder='templates')
 
@@ -77,7 +78,7 @@ def newsample(datasetname):
 def newclass(datasetname, clsname):
     obj = get_object(datasetname, clsname)
     if request.method == "GET":
-        form = get_form(obj, g.db.session)
+        form = get_form(obj, g.db.session, data=request.args.copy())
         retval = {'id': '%s' % clsname,
                   'title': 'New %s' % clsname.capitalize(),
                   'form': form}
@@ -87,7 +88,7 @@ def newclass(datasetname, clsname):
         save(obj, g.db.session, form)
 
 
-def get_form(obj, orm, data=None, datadict=None):
+def get_form(obj, orm, data=None):
     """
     Get the form for a new SQLAlchemy object.
 
@@ -107,19 +108,21 @@ def get_form(obj, orm, data=None, datadict=None):
     
     for name, field in fields.items():
         setattr(formclass, name, field)
-
-    if data is not None:
-        data.redirect = 'list'
-    elif datadict is not None:
-        datadict['redirect'] = 'list'
-    else:
-        datadict = {'redirect': 'list'}
-    form = formclass(formdata=data, data=datadict)
+    if data is None:
+        data = MultiDict()
+    elif isinstance(data, ImmutableMultiDict):
+        data = data.copy()
+    data['redirect'] = 'list'
+    
+    print("Data: %s" % data)
+    form = formclass(formdata=data)
 
     for name, field in fields.items():
         # set html_attributes again as they got lost by formclass(...)
         html_attributes = getattr(field, 'html_attributes', {})
+        valuefunc = getattr(field, 'valuefunc', {})
         getattr(form, name).html_attributes = html_attributes 
+        getattr(form, name).valuefunc = valuefunc
 
     return form 
 
