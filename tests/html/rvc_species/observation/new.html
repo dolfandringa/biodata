@@ -14,15 +14,23 @@
 </head>
 <body>
 <div>
-<form name="form_observation" method="post" action="/rvc_species/observation/new"> 
+<form name="form_observation" method="post" > 
 <table>
-    <tr><th><label for="observer">observer</label></th><td><select autoFocus="True" data-values_url="observer/" name="observer" id="observer">
+    <tr>
+    	<th><label for="observer">observer</label></th>
+    	<td><select autoFocus="True" data-values_url="observer/" name="observer" id="observer">
   <option value="1">dolf</option>
   <option value="2">annelies</option>
 </select>
-<a class='addlink' href='observer/new'>Add observer</a></td></tr>
-    <tr style="display: none;"><th></th><td><input data-values_url="sample/" type="hidden" id="sample" name="sample"/><a class='addlink' href='sample/new'>Add sample</a></td></tr>
-    <tr><th><label for="species">species</label></th><td><select data-values_url="species/" id="species" name="species">
+<a class='addlink' href='observer/new'>Add observer</a></td>
+	</tr>
+    <tr style="display: none;">
+    	<th></th>
+    	<td><input data-values_url="sample/" type="hidden" id="sample" name="sample"/><a class='addlink' href='sample/new'>Add sample</a></td>
+	</tr>
+    <tr>
+    	<th><label for="species">species</label></th>
+    	<td><select data-values_url="species/" id="species" name="species">
   <option value="1">com0</option>
   <option value="2">com1</option>
   <option value="3">com2</option>
@@ -34,14 +42,40 @@
   <option value="9">com8</option>
   <option value="10">com9</option>
 </select>
-<a class='addlink' href='species/new'>Add species</a></td></tr>
-    <tr><th><label for="comments">comments</label></th><td><textarea id="comments" name="comments"></textarea></td></tr>
-    <tr><th><label for="score_0_9">score_0_9</label></th><td><input type="text" id="score_0_9" name="score_0_9"/></td></tr>
-    <tr><th><label for="score_10_19">score_10_19</label></th><td><input type="text" id="score_10_19" name="score_10_19"/></td></tr>
-    <tr><th><label for="score_20_29">score_20_29</label></th><td><input type="text" id="score_20_29" name="score_20_29"/></td></tr>
-    <tr><th><label for="score_30_39">score_30_39</label></th><td><input type="text" id="score_30_39" name="score_30_39"/></td></tr>
-    <tr><th><label for="score_40_49">score_40_49</label></th><td><input type="text" id="score_40_49" name="score_40_49"/></td></tr>
-    <tr style="display: none;"><th></th><td><input type="hidden" id="redirect" value="list" name="redirect"/></td></tr>
+<a class='addlink' href='species/new'>Add species</a></td>
+	</tr>
+    <tr>
+    	<th><label for="comments">comments</label></th>
+    	<td><textarea id="comments" name="comments"></textarea></td>
+    </tr>
+    <tr>
+    	<th><label for="score_0_9">score_0_9</label></th>
+    	<td><input id="score_0_9" name="score_0_9" type="text" value=""></td>
+	</tr>
+    <tr>
+    	<th><label for="score_10_19">score_10_19</label></th>
+    	<td><input id="score_10_19" name="score_10_19" type="text" value=""></td>
+    </tr>
+    <tr>
+    	<th><label for="score_20_29">score_20_29</label></th>
+    	<td><input id="score_20_29" name="score_20_29" type="text" value=""></td>
+	</tr>
+    <tr>
+    	<th><label for="score_30_39">score_30_39</label></th>
+    	<td><input id="score_30_39" name="score_30_39" type="text" value=""></td>
+	</tr>
+    <tr>
+    	<th><label for="score_40_49">score_40_49</label></th>
+    	<td><input id="score_40_49" name="score_40_49" type="text" value=""></td>
+    </tr>
+    <tr style="display: none;">
+    	<th><label for="redirect">redirect</label></th>
+    	<td><input id="redirect" name="redirect" type="hidden" value="list"></td>
+    </tr>
+    <tr style="display: none;">
+    	<th><label for="id">id</label></th>
+    	<td><input id="id" name="redirect" type="hidden" value=""></td>
+    </tr>
 </table>
 </form>
 <button name="save" onclick="alert('test');jQuery('form[name=form_observation]').submit()">Save</button>

@@ -70,7 +70,7 @@ def show(datasetname, clsname, id):
 
 @basebp.route("/<datasetname>/new", methods=["POST", "GET"])
 def newsample(datasetname):
-    pass
+    return ""
 
 
 @basebp.route("/<datasetname>/<clsname>/new", methods=["POST", "GET"])
@@ -78,8 +78,8 @@ def newclass(datasetname, clsname):
     obj = get_object(datasetname, clsname)
     if request.method == "GET":
         form = get_form(obj, g.db.session)
-        retval = {'id': '%s_%s' % (datasetname, clsname),
-                  'title': '%s' % clsname,
+        retval = {'id': '%s' % clsname,
+                  'title': 'New %s' % clsname.capitalize(),
                   'form': form}
         return render_template('form.html', **retval)
     else:
@@ -133,15 +133,16 @@ def save(obj, orm, form):
     :param form: The :class:`wtforms.Form` form to get the values from.
     """
 
+    clsname = request.view_args['clsname']
+    datasetname = request.view_args['datasetname']
     if not form.validate():
         # Validation failed. Back to the form with the error message
-        retval = {'id': "%s_sample" % obj,
-                  'title': "Sample",
+        retval = {'id': "%s_%s" % (datasetname, clsname),
+                  'title': "New %s" % clsname.capitalize(),
                   'form': form}
         return render_template('form.html', **retval)
 
     store_values(obj, orm, form.data)
-
     # handle the resulting redirection.
     if 'HTTP_X_REQUESTED_WITH' in request.header.keys():
         # we're dealing with an ajax request
@@ -157,27 +158,27 @@ def save(obj, orm, form):
             source = dict(source)
             form = get_form(obj, orm, datadict=source)
             retval = {'form': form,
-                      'id': "%s_sample" % obj,
-                      'title': 'Sample'}
+                      'id': "%s" % clsname,
+                      'title': 'New %s' % clsname.capitalize()}
             return render_template('form.html', **retval)
         else:
             # show the added item
             # return redirect('/%s'%inst.id)
             args = {'id': inst.id,
-                    'datasetname': request.view_args['dataset'],
-                    'clsname': request.view_args['clsname']
+                    'datasetname': datasetname,
+                    'clsname': clsname
                     }
             return redirect(url_for('.show', **args))
     elif form.redirect.data == 'form':
         # redirect to the form again, empty values in the form first
         form = get_form(obj, orm)
         retval = {'form': form,
-                  'id': "%s_sample" % obj,
-                  'title': 'Sample'}
+                  'id': "%s" % clsname,
+                  'title': 'New %s' % clsname.capitalize()}
         return render_template('form.html', **retval)
     else:
         # redirect to the list page
-        args = {'datasetname': request.view_args['dataset'],
-                'clsname': request.view_args['clsname']
+        args = {'datasetname': datasetname,
+                'clsname': clsname
                 }
         return redirect(url_for('.index', **args))

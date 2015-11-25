@@ -14,24 +14,54 @@
 </head>
 <body>
 <div>
-<form name="form_sample" method="post" action="/rvc_species/sample/new"> 
+<form name="form_sample" method="post" > 
 <table>
-    <tr><th><label for="site">site</label></th><td><select autoFocus="True" data-values_url="site/" name="site" id="site">
+    <tr>
+    	<th><label for="site">site</label></th>
+    	<td>
+    		<select autoFocus="True" data-values_url="site/" name="site" id="site">
   <option value="1">guinsuan, , </option>
 </select>
-<a class='addlink' href='site/new'>Add site</a></td></tr>
-    <tr><th><label for="speciesgroup">speciesgroup</label></th><td><select data-values_url="speciesgroup/" id="speciesgroup" name="speciesgroup">
+<a class='addlink' href='site/new'>Add site</a>
+		</td>
+	</tr>
+    <tr>
+    	<th><label for="speciesgroup">speciesgroup</label></th>
+    	<td>
+    		<select data-values_url="speciesgroup/" id="speciesgroup" name="speciesgroup">
   <option value="1">TestSpecGroup</option>
 </select>
-<a class='addlink' href='speciesgroup/new'>Add speciesgroup</a></td></tr>
-    <tr><th><label for="participants">participants</label></th><td><select data-values_url="observer/" multiple="True" id="participants" name="participants">
+<a class='addlink' href='speciesgroup/new'>Add speciesgroup</a>
+		</td>
+	</tr>
+    <tr>
+    	<th><label for="participants">participants</label></th>
+    	<td>
+    		<select data-values_url="observer/" multiple="True" id="participants" name="participants">
   <option value="1">dolf</option>
   <option value="2">annelies</option>
 </select>
-<a class='addlink' href='observer/new'>Add observer</a></td></tr>
-    <tr><th><label for="date">date</label></th><td><input type="text" id="date" name="date"/> format: YYYY-MM-DD</td></tr>
-    <tr><th><label for="time">time</label></th><td><input type="text" id="time" name="time"/> format: HH:MM</td></tr>
-    <tr style="display: none;"><th></th><td><input type="hidden" id="redirect" value="list" name="redirect"/></td></tr>
+<a class='addlink' href='observer/new'>Add observer</a>
+		</td>
+	</tr>
+    <tr>
+    	<th><label for="date">date</label></th>
+    	<td>
+    		<input type="text" id="date" name="date"> format: YYYY-MM-DD
+    	</td>
+    </tr>
+    <tr>
+    	<th><label for="time">time</label></th>
+    	<td>
+    		<input type="text" id="time" name="time"> format: HH:MM
+    	</td>
+    </tr>
+    <tr style="display: none;">
+    	<th></th>
+    	<td>
+    		<input type="hidden" id="redirect" value="list" name="redirect">
+    	</td>
+    </tr>
 </table>
 </form>
 <button name="save" onclick="alert('test');jQuery('form[name=form_sample]').submit()">Save</button>

@@ -15,7 +15,7 @@
 <body>
 <div>
 {% from "_form_helpers.html" import render_field %}
-<form name="form_{{ id }}" method="post" {% if action is defined %}action="{{ action }} {% endif %}"> 
+<form name="form_{{ id }}" method="post" {% if action is defined %}action="{{ action }}" {% endif %}> 
 	{% if form.errors %} <p class="error">An error occured. Please try again.</p> {% endif %}
 	<table>
 	{% for field in form %}

@@ -14,14 +14,36 @@
 </head>
 <body>
 <div>
-<form name="form_site" method="post" action="/rvc_species/site/new"> 
+<form name="form_site" method="post" > 
 <table>
-    <tr><th><label for="barangay">barangay</label></th><td><input autoFocus="True" type="text" id="barangay" name="barangay"/></td></tr>
-    <tr><th><label for="lat">lat</label></th><td><input type="text" id="lat" name="lat"/></td></tr>
-    <tr><th><label for="lon">lon</label></th><td><input type="text" id="lon" name="lon"/></td></tr>
-    <tr><th><label for="municipality">municipality</label></th><td><input type="text" id="municipality" name="municipality"/></td></tr>
-    <tr><th><label for="name">name</label></th><td><input type="text" id="name" name="name"/></td></tr>
-    <tr style="display: none;"><th></th><td><input type="hidden" id="redirect" value="list" name="redirect"/></td></tr>
+    <tr>
+    	<th><label for="barangay">barangay</label></th>
+    	<td><input autoFocus id="barangay" name="barangay" type="text" value=""></td>
+    </tr>
+    <tr>
+    	<th><label for="lat">lat</label></th>
+    	<td><input id="lat" name="lat" type="text" value=""></td>
+	</tr>
+    <tr>
+    	<th><label for="lon">lon</label></th>
+    	<td><input id="lon" name="lon" type="text" value=""></td>
+	</tr>
+    <tr>
+    	<th><label for="municipality">municipality</label></th>
+    	<td><input id="municipality" name="municipality" type="text" value=""></td>
+	</tr>
+    <tr>
+    	<th><label for="name">name</label></th>
+    	<td><input id="name" name="name" type="text" value=""></td>
+    </tr>
+    <tr style="display: none;">
+    	<th><label for="redirect">redirect</label></th>
+    	<td><input id="redirect" name="redirect" type="hidden" value="list"></td>
+	</tr>
+	<tr style="display: none;">
+    	<th><label for="id">id</label></th>
+    	<td><input id="id" name="id" type="hidden" value=""></td>
+	</tr>
 </table>
 </form>
 <button name="save" onclick="alert('test');jQuery('form[name=form_site]').submit()">Save</button>

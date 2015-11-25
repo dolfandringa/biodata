@@ -21,6 +21,7 @@ class ControllerTest(_BaseDBTest):
         _BaseDBTest.setUp(self)
         uri = self.app.config['SQLALCHEMY_DATABASE_URI']
         self.maxDiff = None
+        self.whitespace_re = re.compile("^[\s]+", re.MULTILINE)
 
     def tearDown(self):
         _BaseDBTest.tearDown(self)
@@ -30,7 +31,24 @@ class ControllerTest(_BaseDBTest):
         Test form display and operation.
         """
 
-        self.fail("Test form display.")
+        for base, dirs, files in os.walk(os.path.join(curdir, 'html')):
+            for file in files:
+                if file != "new.html":
+                    continue
+                endpt = "%s/new" % base.split(os.path.join(curdir, 'html'))[-1]
+                if endpt == "/rvc_species/new":
+                    continue
+                print("Fetching %s" % endpt)
+                response = self.client.get(endpt)
+                self.assertEqual(response.status_code, 200)
+                result = response.get_data(as_text=True)
+                result = re.sub(self.whitespace_re, "", result)
+                # remove whitespace at the beginning of a line
+                f = open(os.path.join(base, file), 'r')
+                expected = f.read()
+                # remove whitespace at the beginning of a line
+                expected = re.sub(self.whitespace_re, "", expected)
+                self.assertMultiLineEqual(expected, result)
         self.fail("Test form submission with validation failures.")
         self.fail("Test form user submission with destination is form. " +
                   "User should be redirected to the form but all fields " +
@@ -40,13 +58,15 @@ class ControllerTest(_BaseDBTest):
                   "and select fields filled in but other fields empty.")
         self.fail("Test user form submission with destination is list. " +
                   "User should be redirected to the list page.")
+        self.fail("/rvc_species/new not tested yet. " +
+                  "(see continue statement on line 40)")
 
     def test_list(self):
         """
         Test the list controller without selection parameters.
         """
 
-        r = re.compile("^[\s]+", re.MULTILINE)
+        
         for base, dirs, files in os.walk(os.path.join(curdir, 'html')):
             for file in files:
                 if file != "index.html":
@@ -57,11 +77,11 @@ class ControllerTest(_BaseDBTest):
                 self.assertEqual(response.status_code, 200)
                 result = response.get_data(as_text=True)
                 # remove whitespace at the beginning of a line
-                result = re.sub(r, "", result)
+                result = re.sub(self.whitespace_re, "", result)
                 f = open(os.path.join(base, file), 'r')
                 expected = f.read()
                 # remove whitespace at the beginning of a line
-                expected = re.sub(r, "", expected)
+                expected = re.sub(self.whitespace_re, "", expected)
                 self.assertMultiLineEqual(expected, result)
 
     def test_show(self):
@@ -69,7 +89,6 @@ class ControllerTest(_BaseDBTest):
         Test the show controller.
         """
 
-        r = re.compile("^[\s]+", re.MULTILINE)
         for base, dirs, files in os.walk(os.path.join(curdir, 'html')):
             for file in files:
                 if file != "1.html":
@@ -79,12 +98,12 @@ class ControllerTest(_BaseDBTest):
                 response = self.client.get(endpt)
                 self.assertEqual(response.status_code, 200)
                 result = response.get_data(as_text=True)
-                result = re.sub(r, "", result)
+                result = re.sub(self.whitespace_re, "", result)
                 # remove whitespace at the beginning of a line
                 f = open(os.path.join(base, file), 'r')
                 expected = f.read()
                 # remove whitespace at the beginning of a line
-                expected = re.sub(r, "", expected)
+                expected = re.sub(self.whitespace_re, "", expected)
                 self.assertMultiLineEqual(expected, result)
 
     def test_delete(self):
