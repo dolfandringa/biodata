@@ -115,7 +115,7 @@ class ControllerTest(_BaseDBTest):
                 ('date', '2015-01-01'),
                 ]
         data = MultiDict(data)
-        headers = [('HTTP_X_REQUESTED_WITH','')]
+        headers = [('X_REQUESTED_WITH','')]
         response = self.client.post('/rvc_species/sample/new', data=data,
                                     headers=headers, follow_redirects=False)
         print(response.get_data(as_text=True))
@@ -139,8 +139,20 @@ class ControllerTest(_BaseDBTest):
         """
         Test the /rvc_species/new form.
         """
-        self.fail("/rvc_species/new not tested yet. " +
-                  "(see continue statement on line 40)")
+
+        endpt = "/rvc_species/new"
+        response = self.client.get(endpt)
+        self.assertEqual(response.status_code, 200)
+        result = response.get_data(as_text=True)
+        result = re.sub(self.whitespace_re, "", result)
+        # remove whitespace at the beginning of a line
+        base = os.path.join(curdir, 'html', 'rvc_species')
+        f = open(os.path.join(base, 'new.html'), 'r')
+        expected = f.read()
+        # remove whitespace at the beginning of a line
+        expected = re.sub(self.whitespace_re, "", expected)
+        self.assertMultiLineEqual(expected, result)
+
 
     def test_list(self):
         """

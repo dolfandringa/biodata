@@ -77,17 +77,22 @@ def show(datasetname, clsname, id):
 
 @basebp.route("/<datasetname>/new", methods=["POST", "GET"])
 def newsample(datasetname):
-    return ""
+    retval = {}
+    return render_template('new.html', **retval)
 
 
 @basebp.route("/<datasetname>/<clsname>/new", methods=["POST", "GET"])
 def newclass(datasetname, clsname):
     obj = get_object(datasetname, clsname)
     if request.method == "GET":
+        args = {'datasetname': datasetname,
+                'clsname': clsname}
+        action = url_for('.newclass', **args)
         form = get_form(obj, g.db.session, data=request.args.copy())
         retval = {'id': '%s' % clsname,
                   'title': 'New %s' % clsname.capitalize(),
-                  'form': form}
+                  'form': form,
+                  'action': action}
         return render_template('form.html', **retval)
     else:
         form = get_form(obj, g.db.session, data=request.form)
@@ -154,7 +159,7 @@ def save(obj, orm, form):
     inst = store_values(obj, orm, form.data)
     # handle the resulting redirection.
     print(request.headers.items())
-    if 'http-x-requested-with' in [k.lower() for k in request.headers.keys()]:
+    if 'x-requested-with' in [k.lower() for k in request.headers.keys()]:
         # we're dealing with an ajax request
         if form.redirect.data == 'form':
             # back to the form with the same values
