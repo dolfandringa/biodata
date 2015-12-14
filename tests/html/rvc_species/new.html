@@ -86,8 +86,8 @@ ObservationForm.prototype.getAjaxForm = function(){
 
 ObservationForm.prototype.setAjaxForm = function(){
   this.container.find('form').submit(function(e){
-    dialog=openWaitDialog('Saving observation.');
     e.preventDefault();
+    dialog=openWaitDialog('Saving observation.');
     jQuery.ajax({
       method:"POST",
       url: jQuery(this).attr('action'),

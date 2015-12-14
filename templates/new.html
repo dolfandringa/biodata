@@ -38,7 +38,7 @@ ObservationList.prototype.constructor = ObservationList;
 ObservationList.prototype.render = function(){
   formContainer.prototype.render.apply(this,arguments)
   jQuery.ajax({method:'get',url:this.url+'?'+jQuery.param(this.params),context:this,success:function(data){
-    this.container.html(data)
+	  this.container.html(data)
     setModalLinks(this)
   }});
 }
@@ -86,8 +86,8 @@ ObservationForm.prototype.getAjaxForm = function(){
 
 ObservationForm.prototype.setAjaxForm = function(){
   this.container.find('form').submit(function(e){
+  	e.preventDefault();
     dialog=openWaitDialog('Saving observation.');
-    e.preventDefault();
     jQuery.ajax({
       method:"POST",
       url: jQuery(this).attr('action'),

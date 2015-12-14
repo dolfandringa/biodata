@@ -148,17 +148,19 @@ def save(obj, orm, form):
 
     clsname = request.view_args['clsname']
     datasetname = request.view_args['datasetname']
-    print(form.data)
+    args = {'datasetname': datasetname,
+            'clsname': clsname}
+    action = url_for('.newclass', **args)
     if not form.validate():
         # Validation failed. Back to the form with the error message
         retval = {'id': "%s_%s" % (datasetname, clsname),
                   'title': "New %s" % clsname.capitalize(),
-                  'form': form}
+                  'form': form,
+                  'action': action}
         return render_template('form.html', **retval)
 
     inst = store_values(obj, orm, form.data)
     # handle the resulting redirection.
-    print(request.headers.items())
     if 'x-requested-with' in [k.lower() for k in request.headers.keys()]:
         # we're dealing with an ajax request
         if form.redirect.data == 'form':
@@ -174,7 +176,8 @@ def save(obj, orm, form):
             form = get_form(obj, orm, data=source)
             retval = {'form': form,
                       'id': "%s" % clsname,
-                      'title': 'New %s' % clsname.capitalize()}
+                      'title': 'New %s' % clsname.capitalize(),
+                      'action': action}
             return render_template('form.html', **retval)
         else:
             # show the added item
@@ -189,7 +192,8 @@ def save(obj, orm, form):
         form = get_form(obj, orm, data=MultiDict({'redirect': 'form'}))
         retval = {'form': form,
                   'id': "%s" % clsname,
-                  'title': 'New %s' % clsname.capitalize()}
+                  'title': 'New %s' % clsname.capitalize(),
+                  'action': action}
         return render_template('form.html', **retval)
     else:
         # redirect to the list page

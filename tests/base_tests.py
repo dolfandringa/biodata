@@ -77,8 +77,8 @@ def load_data(session):
     
     for i in range(10):
         spec = model.rvc_species.Species()
-        spec.scientific_name = 'sci%i'%i
-        spec.common_name = 'com%i'%i
+        spec.scientific_name = u'sci%i'%i
+        spec.common_name = u'com%i'%i
         add(spec)
     
     for i in range(10):
