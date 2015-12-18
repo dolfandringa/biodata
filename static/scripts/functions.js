@@ -61,7 +61,6 @@ function cleanupModalForm(dialog,container){
 function openWaitDialog(message){
   dialog=jQuery("<div class='modalForm'><div class='content'><div class='icon'></div><span class='message'>" +message+"</span></div></div>");
   jQuery('body').append(dialog);
-  console.log(dialog.find('.icon'));
   dialog.find('.icon').activity({segments: 8, width:4, space: 0, length: 3, color: '#0b0b0b', speed: 1.5});
   dialog = dialog.dialog({
     dialogClass: 'no-close',
@@ -113,7 +112,6 @@ function setModalLinks(container){
     return false;
   });
   obj.find('a.deletelink').click(function(e){
-    console.log(jQuery(this));
     url=jQuery(this).attr('href')
     dialog=openWaitDialog('Just a moment please.')
     jQuery.get(url,function(){

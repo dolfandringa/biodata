@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, render_template, g, flash
-from flask import redirect, url_for
+from flask import redirect, url_for, Response
+import json
 from sqlalchemy import or_, and_
 from util import get_object, get_colnames, get_values, json_desired
 from util import get_fields, get_primary_keys, store_values
@@ -12,6 +13,10 @@ basebp = Blueprint('/', 'BaseBlueprint', template_folder='templates')
 
 @basebp.route('/')
 def index():
+    """
+    The initial page with the selection of the dataset.
+
+    """
     datasets = [d.__name__.split('.')[-1] for d in model.datasets]
     retval = {'datasets': datasets}
     return render_template('index.html', **retval)
@@ -19,6 +24,13 @@ def index():
 
 @basebp.route('/<datasetname>/<clsname>/delete/<int:id>', methods=["POST"])
 def delete(datasetname, clsname, id):
+    """
+    Delete an sqlalchemy instance (row) from the database.
+
+    :param datasetname: The name of the dataset to delete an the instance from.
+    :param clsname: The name of the class to delete an instance from.
+    :param id: The id of the instance to delete from the database.
+    """
     obj = get_object(datasetname, clsname)
     inst = g.db.session.query(obj).get(id)
     g.db.session.delete(inst)
@@ -49,7 +61,9 @@ def class_index(datasetname, clsname):
     else:
         instances = g.db.session.query(obj).all()
     if json_desired():
-        return jsonify([(s.id, str(s)) for s in instances])
+        data = [(s.id, str(s)) for s in instances]
+        return Response(json.dumps(data),  mimetype='application/json')
+        # return jsonify(data)
     else:
         retval = {
           'instances': [get_values(i) for i in instances],
@@ -208,4 +222,4 @@ def save(obj, orm, form):
         args = {'datasetname': datasetname,
                 'clsname': clsname
                 }
-        return redirect(url_for('.index', **args))
+        return redirect(url_for('.class_index', **args))

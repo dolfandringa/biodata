@@ -1,12 +1,9 @@
-from base_tests import _BaseDBTest, _BaseTest
-import testmodel
-import biodata
+from base_tests import _BaseDBTest
+import json
 from biodata import model
 import os
 import re
-import lxml
 from pyquery import PyQuery as pq
-import json
 import datetime
 from werkzeug.datastructures import MultiDict
 
@@ -21,7 +18,6 @@ class ControllerTest(_BaseDBTest):
 
     def setUp(self):
         _BaseDBTest.setUp(self)
-        uri = self.app.config['SQLALCHEMY_DATABASE_URI']
         self.maxDiff = None
         self.whitespace_re = re.compile("^[\s]+", re.MULTILINE)
 
@@ -53,7 +49,7 @@ class ControllerTest(_BaseDBTest):
                 # remove whitespace at the beginning of a line
                 expected = re.sub(self.whitespace_re, "", expected)
                 self.assertMultiLineEqual(expected, result)
-    
+
     def test_form_submission_error(self):
         """
         Testing if submitting an empty form results in validation errors.
@@ -64,13 +60,13 @@ class ControllerTest(_BaseDBTest):
         self.assertEqual(response.status_code, 200)
         d = pq(response.get_data(as_text=True))
         self.assertEqual(len(d(".error")), 2)
-    
+
     def test_form_submission_redirect(self):
         """
         Add an observer and test if it gets stored. Also check if the result
         is a redirect to the list page.
         """
-        
+
         data = {'name': 'dolftest'}
         response = self.client.post('/rvc_species/observer/new', data=data,
                                     follow_redirects=True)
@@ -78,23 +74,23 @@ class ControllerTest(_BaseDBTest):
         with self.app.app_context():
             observers = self.session.query(model.rvc_species.Observer).all()
             self.assertEqual(len(observers), 3)
-        
+
         response = self.client.post('/rvc_species/observer/new', data=data,
                                     follow_redirects=False)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.location, 
+        self.assertEqual(response.location,
                          'http://localhost/rvc_species/observer/')
 
     def test_form_submission_form(self):
         """
         Test if adding redirect=form to the data results in the user being
         shown an empty form again with the redirect value preserved.
-        """        
+        """
         data = {'name': 'dolftest', 'redirect': 'form'}
         response = self.client.post('/rvc_species/observer/new', data=data,
                                     follow_redirects=False)
         self.assertEqual(response.status_code, 200)
-        result = response.get_data(as_text=True) 
+        result = response.get_data(as_text=True)
         print(result)
         d = pq(result)
         self.assertEqual(len(d(".error")), 0)
@@ -115,11 +111,11 @@ class ControllerTest(_BaseDBTest):
                 ('date', '2015-01-01'),
                 ]
         data = MultiDict(data)
-        headers = [('X_REQUESTED_WITH','')]
+        headers = [('X_REQUESTED_WITH', '')]
         response = self.client.post('/rvc_species/sample/new', data=data,
                                     headers=headers, follow_redirects=False)
         print(response.get_data(as_text=True))
-        self.assertEqual(response.status_code,302)
+        self.assertEqual(response.status_code, 302)
         self.assertEqual(response.location,
                          'http://localhost/rvc_species/sample/3')
         with self.app.app_context():
@@ -127,13 +123,12 @@ class ControllerTest(_BaseDBTest):
             samples = query.all()
             self.assertEqual(len(samples), 3)
             sample = query.get(3)
-            self.assertEqual(sample.date, datetime.date(2015,01,01))
+            self.assertEqual(sample.date, datetime.date(2015, 01, 01))
             site = self.session.query(model.rvc_species.Site).get(1)
             self.assertEqual(sample.site, site)
             query = self.session.query(model.rvc_species.Observer)
             participants = [query.get(1), query.get(2)]
             self.assertEqual(sample.participants, participants)
-            
 
     def test_master_form(self):
         """
@@ -153,13 +148,34 @@ class ControllerTest(_BaseDBTest):
         expected = re.sub(self.whitespace_re, "", expected)
         self.assertMultiLineEqual(expected, result)
 
+    def test_list_json(self):
+        """
+        Test the list controller while requesting json.
+        """
+        endpt = "/rvc_species/observer/"
+        print("Fetching %s" % endpt)
+        headers = {'Accept': 'application/json'}
+        response = self.client.get(endpt,
+                                   content_type='application/json',
+                                   headers=headers)
+        self.assertEqual(response.status_code, 200)
+        result = response.get_data(as_text=True)
+        result = json.loads(result)
+        print(result)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 2)
+        self.assertIsInstance(result[0], list)
+        self.assertEqual(len(result[0]), 2)
+        self.assertIsInstance(result[0][0], int)
+        self.assertIsInstance(result[1], list)
+        self.assertIsInstance(result[1][0], int)
+        self.assertEqual(len(result[1]), 2)
 
     def test_list(self):
         """
         Test the list controller without selection parameters.
         """
 
-        
         for base, dirs, files in os.walk(os.path.join(curdir, 'html')):
             for file in files:
                 if file != "index.html":

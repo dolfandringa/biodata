@@ -256,8 +256,8 @@ def get_fields(obj, orm):
         values = orm.query(target).all()
         fname = getattr(target, 'pretty_name', attr.key)
         args = {'datasetname': datasetname, 'clsname': fname}
-        data_url = url_for('/.index', **args)
-        new_url = url_for('/.newclass', **args)
+        data_url = url_for('.class_index', **args)
+        new_url = url_for('.newclass', **args)
         fields[fname] = {
             'widget': wtforms.SelectField,
             'label': fname,
@@ -278,8 +278,8 @@ def get_fields(obj, orm):
         values = orm.query(target).all()
         fname = getattr(target, 'pretty_name', target.__name__)
         args = {'datasetname': unicode(datasetname), 'clsname': unicode(fname)}
-        data_url = url_for('/.index', **args)
-        new_url = url_for('/.newclass', **args)
+        data_url = url_for('.class_index', **args)
+        new_url = url_for('.newclass', **args)
         fields[attr.key] = {
             'widget': wtforms.SelectMultipleField,
             'label': attr.key,
