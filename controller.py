@@ -5,8 +5,16 @@ from util import get_object, get_colnames, get_values, json_desired
 from util import get_fields, get_primary_keys, store_values
 import wtforms
 from werkzeug.datastructures import MultiDict, ImmutableMultiDict
+from biodata import model
 
 basebp = Blueprint('/', 'BaseBlueprint', template_folder='templates')
+
+
+@basebp.route('/')
+def index():
+    datasets = [d.__name__.split('.')[-1] for d in model.datasets]
+    retval = {'datasets': datasets}
+    return render_template('index.html', **retval)
 
 
 @basebp.route('/<datasetname>/<clsname>/delete/<int:id>', methods=["POST"])
@@ -20,7 +28,7 @@ def delete(datasetname, clsname, id):
 
 @basebp.route('/<datasetname>/<clsname>/list')
 @basebp.route('/<datasetname>/<clsname>/')
-def index(datasetname, clsname):
+def class_index(datasetname, clsname):
     """
     Show a list of all instances of the object/dataset combination.
 

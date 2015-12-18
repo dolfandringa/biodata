@@ -1,4 +1,3 @@
-$def with(datasets)
 <html>
 <head>
 <title>Biodata</title>
@@ -30,8 +29,9 @@ jQuery(document).ready(function(){
   <div id='messages'></div>
   <select id='dataset'>
     <option>-- Select a dataset --</option>
-  $for dataset in datasets:
-    <option>$dataset</option>
+	    {% for dataset in datasets %}
+        <option>{{ dataset }}</option>
+      {% endfor %}
   </select>
 </body>
 </html>
