@@ -1,11 +1,9 @@
-import datetime
 from biodata.model import datasets
 import wtforms
 from sqlalchemy import types as sa_types
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.properties import RelationshipProperty, ColumnProperty
 from collections import OrderedDict
-import decimal
 from flask import request, url_for
 
 
@@ -192,7 +190,6 @@ def get_simple_columns(obj):
     any fields defined through relationship attributes.
     """
 
-    fields = []
     for attr in get_data_attributes(obj):
         if isinstance(attr.property, ColumnProperty):
             # this is a normal column property
@@ -251,7 +248,6 @@ def get_fields(obj, orm):
     attributes (one-to-many and many-to-many) into account.
     """
     datasetname = obj.__module__.split('.')[-1]
-    clsname = obj.__name__
     fields = OrderedDict()
     for attr in get_relation_attributes(obj):
         # turn foreign keys into dropdowns with the id as value

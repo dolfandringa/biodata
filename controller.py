@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request, render_template, g, flash
-from flask import redirect
-from biodata.model import datasets
+from flask import redirect, url_for
 from sqlalchemy import or_, and_
-from util import *
+from util import get_object, get_colnames, get_values, json_desired
+from util import get_fields, get_primary_keys, store_values
 import wtforms
 from werkzeug.datastructures import MultiDict, ImmutableMultiDict
 
@@ -116,25 +116,25 @@ def get_form(obj, orm, data=None):
 
     class formclass(wtforms.Form):
         pass
-    
+
     for name, field in fields.items():
         setattr(formclass, name, field)
     if data is None:
         data = MultiDict()
     elif isinstance(data, ImmutableMultiDict):
         data = data.copy()
-    data['redirect'] = data.get('redirect','list')
-    
+    data['redirect'] = data.get('redirect', 'list')
+
     form = formclass(formdata=data)
 
     for name, field in fields.items():
         # set html_attributes again as they got lost by formclass(...)
         html_attributes = getattr(field, 'html_attributes', {})
         valuefunc = getattr(field, 'valuefunc', {})
-        getattr(form, name).html_attributes = html_attributes 
+        getattr(form, name).html_attributes = html_attributes
         getattr(form, name).valuefunc = valuefunc
 
-    return form 
+    return form
 
 
 def save(obj, orm, form):
