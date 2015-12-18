@@ -24,7 +24,9 @@ class _BaseDBTest(_BaseTest):
     """
     def setUp(self):
         _BaseTest.setUp(self)
-        biodata.init_db(self.app)
+        biodata.config_db(self.app)
+        biodata.bind_db(self.app)
+        biodata.setup_db(self.app)
         with self.app.app_context():
             load_data(biodata.db.session)
 

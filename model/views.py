@@ -16,7 +16,7 @@ views={
                  LEFT JOIN rvc_species_sample USING (id)) s
          LEFT JOIN base_site ON s.site_id = base_site.id
       WHERE s.num_occurence > 1;""",
-    
+
     'duplicate_species': """SELECT s.id,
         s.dataset,
         s.num_occurence_common,
@@ -31,7 +31,7 @@ views={
                 base_species.scientific_name
                FROM base_species) s
       WHERE s.num_occurence_common > 1 OR s.num_occurence_scientific > 1;""",
-    
+
     'random_swim_species_observations': """SELECT base_sample.id AS sample_id,
         base_observation.id AS observation_id,
         base_site.name AS site,
@@ -58,7 +58,7 @@ views={
          LEFT JOIN base_site ON base_sample.site_id = base_site.id
          LEFT JOIN base_species ON base_species.id = random_swim_species_observation.species_id
       ORDER BY base_sample.date, base_sample.id, base_observer.id;""",
-      
+
     'random_swim_species_sites':"""SELECT base_site.name AS site,
         base_site.barangay,
         base_site.municipality,
@@ -67,7 +67,7 @@ views={
          LEFT JOIN base_sample ON base_sample.id = random_swim_species_sample.id
          LEFT JOIN base_site ON base_sample.site_id = base_site.id
       GROUP BY base_site.id, base_site.name, base_site.barangay, base_site.municipality;""",
-      
+
     'rvc_species_observations':"""SELECT base_sample.id AS sample_id,
         base_observation.id AS observation_id,
         base_site.name AS site,
@@ -96,7 +96,7 @@ views={
          LEFT JOIN base_site ON base_sample.site_id = base_site.id
          LEFT JOIN base_species ON base_species.id = rvc_species_observation.species_id
       ORDER BY rvc_species_speciesgroup.name, base_sample.date, base_sample.id, base_observer.id, base_observation.id;""",
-      
+
       'rvc_species_sites':"""SELECT base_site.name AS site,
         rvc_species_speciesgroup.name AS species_group,
         base_site.barangay,
@@ -107,8 +107,8 @@ views={
          LEFT JOIN base_sample ON base_sample.id = rvc_species_sample.id
          LEFT JOIN base_site ON base_sample.site_id = base_site.id
       GROUP BY base_site.id, base_site.name, base_site.barangay, base_site.municipality, rvc_species_speciesgroup.name;""",
-      
-    'small_samples':"""SELECT 
+
+    'small_samples':"""SELECT
             *
         FROM
         (SELECT count(base_observation.id) as num_observations,
@@ -132,7 +132,7 @@ views={
            LEFT JOIN rvc_species_speciesgroup ON rvc_species_speciesgroup.id=rvc_species_sample.species_group_id
         GROUP BY base_sample.id,date,time,site, base_observation.dataset, observer, species_group) s
         WHERE max_observations_sample<12""",
-    
+
     'duplicate_observations': """SELECT s.sample_id,
             base_sample.date,
             base_site.name AS site,
@@ -166,8 +166,8 @@ views={
              LEFT JOIN base_site ON base_sample.site_id = base_site.id
           WHERE s.num_occurence > 1
           ORDER BY s.sample_id, s.observer_id""",
-    
-    'rvc_species_samples':""" 
+
+    'rvc_species_samples':"""
          SELECT
             base_sample.id as sample_id,
             base_site.id as site_id,

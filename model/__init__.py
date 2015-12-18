@@ -9,6 +9,7 @@ import os
 import rvc_species
 import random_swim_species
 import clams
+from views import views
 
 #config.read(settings_file)
 #uri=config.get('database','uri')
