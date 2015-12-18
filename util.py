@@ -254,6 +254,7 @@ def get_fields(obj, orm):
         # and the column "name" as description
         target = attr.property.mapper.entity
         values = orm.query(target).all()
+        values.sort(key=str)
         fname = getattr(target, 'pretty_name', attr.key)
         args = {'datasetname': datasetname, 'clsname': fname}
         data_url = url_for('.class_index', **args)
@@ -276,6 +277,7 @@ def get_fields(obj, orm):
         # the dropdown should allow multiple values
         target = attr.property.mapper.entity
         values = orm.query(target).all()
+        values.sort(key=str)
         fname = getattr(target, 'pretty_name', target.__name__)
         args = {'datasetname': unicode(datasetname), 'clsname': unicode(fname)}
         data_url = url_for('.class_index', **args)
