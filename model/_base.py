@@ -2,7 +2,9 @@ from sqlalchemy import Column, Integer, String, Unicode, Table, Date, Time
 from sqlalchemy import ForeignKey, UnicodeText
 from sqlalchemy.orm import relationship
 import wtforms
-from biodata import db
+from flask.ext.sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 Base = db.Model
 
