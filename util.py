@@ -104,11 +104,11 @@ __type_map = {
     sa_types.UnicodeText: {'widget': wtforms.TextAreaField},
     sa_types.Date: {
         'widget': wtforms.DateField,
-        'kwargs': {'description': " format: YYYY-MM-DD",
+        'kwargs': {'description': " format: YYYY-MM-DD ",
                    'format': '%Y-%m-%d'}},
     sa_types.Time: {
         'widget': wtforms.DateTimeField,
-        'kwargs': {'description': " format: HH:MM",
+        'kwargs': {'description': " format: HH:MM ",
                    'format': '%H:%M'}},
 }
 
@@ -268,7 +268,7 @@ def get_fields(obj, orm):
                 'choices': [(v.id, str(v)) for v in values],
                 'coerce': int,
                 'description':
-                    "<a class='addlink' href='%s'>Add %s</a>" %
+                    "<a class='addlink' href='%s'>Add %s</a> " %
                     (new_url, fname),
                 }}
     for attr in get_multi_relation_attributes(obj):
@@ -291,7 +291,7 @@ def get_fields(obj, orm):
                 'choices': [(v.id, str(v)) for v in values],
                 'coerce': int,
                 'description':
-                    "<a class='addlink' href='%s'>Add %s</a>" %
+                    "<a class='addlink' href='%s'>Add %s</a> " %
                     (new_url, fname),
                 }}
     for c in get_simple_columns(obj):

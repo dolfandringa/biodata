@@ -98,7 +98,7 @@ ObservationForm.prototype.setAjaxForm = function(){
         obsForm.setAjaxForm();
         setModalLinks(obsForm);
         obsForm.setSaveButtons();
-        jQuery('#messages').html("<div class='message'>Observation saved.</div>");
+        obsForm.container.find('ul.messages').html("<li class='message'>Observation saved.</li>");
         obsList.render({sample_id:obsForm.params['sample']});
       },
       error:function(data,textStatus){
@@ -154,8 +154,8 @@ SampleForm.prototype.setAjaxForm = function(){
         samForm.setAjaxForm();
         samForm.setSaveButtons();
         sampleid=samForm.container.find("input[name='id']").val();
-        if(sampleid!=undefined){
-            jQuery('#messages').append("<div class='message'>Sample saved.</div>");
+        if(sampleid!=""){
+            samForm.container.find('ul.messages').html("<li class='message'>Sample saved.</li>");
             obsList.render({sample_id:sampleid})
             obsForm.render({sample:sampleid});
         }
@@ -179,8 +179,9 @@ jQuery(document).ready(function(){
 </script>
 </head>
 <body id='dataEntryForm'>
-  <div id='messages'></div>
+  <ul class='messages'></ul>
   <div id="forms">
   </div>
 </body>
 </html>
+

@@ -1,3 +1,8 @@
+.error{
+  font-weight: bold;
+  color: red;
+}
+
 input,select{
   margin: 2px 0px;
 }

@@ -6,13 +6,13 @@
 </head>
 <body id='{{ name }}List' class='list'>
 	{% with messages = get_flashed_messages() %}
+  <ul class="messages">
 	  {% if messages %}
-	    <ul class=flashes>
 	    {% for message in messages %}
-	      <li>{{ message }}</li>
+	      <li class="message">{{ message }}</li>
 	    {% endfor %}
-	    </ul>
 	  {% endif %}
+  </ul>
 	{% endwith %}
   <div class="headerrow">
     {% for k in fields %}
@@ -32,3 +32,4 @@
     {% endfor %}
 </body>
 </html>
+
