@@ -223,10 +223,10 @@ class ControllerTest(_BaseDBTest):
         with self.app.app_context():
             samples = self.session.query(model.rvc_species.Sample).all()
             self.assertEqual(len(samples), 2)
-            response = self.client.get('/rvc_species/sample/delete/1')
-            # should return 405 as only POST is allowed.
-            self.assertEqual(response.status_code, 405)
+            # should return 405 as only GET is allowed.
             response = self.client.post('/rvc_species/sample/delete/1')
+            self.assertEqual(response.status_code, 405)
+            response = self.client.get('/rvc_species/sample/delete/1')
             self.assertEqual(response.status_code, 200)
             result = json.loads(response.get_data())
             self.assertEqual(result, {'success': True})
