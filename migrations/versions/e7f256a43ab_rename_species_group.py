@@ -190,11 +190,12 @@ old_views = {
 }
 
 new_views = copy.deepcopy(old_views)
+
 new_views['duplicate_samples'] = """SELECT s.id AS sample_id,
         s.num_occurence,
         s.date,
         s."time",
-        (((base_site.name::text || ', '::text) || base_site.barangay::text) || ', '::text) || base_site.municipality::text,
+        (((base_site.name::text || ', '::text) || base_site.barangay::text) || ', '::text) || base_site.municipality::text as site,
         s.dataset
        FROM ( SELECT count(base_sample.id) OVER (PARTITION BY rvc_species_sample.speciesgroup_id, base_sample.dataset, base_sample.date, base_sample."time", base_sample.site_id) AS num_occurence,
                 base_sample.id,
@@ -207,6 +208,7 @@ new_views['duplicate_samples'] = """SELECT s.id AS sample_id,
                  LEFT JOIN rvc_species_sample USING (id)) s
          LEFT JOIN base_site ON s.site_id = base_site.id
       WHERE s.num_occurence > 1;"""
+
 new_views['rvc_species_observations'] = """SELECT base_sample.id AS sample_id,
         base_observation.id AS observation_id,
         base_site.name AS site,
@@ -235,6 +237,7 @@ new_views['rvc_species_observations'] = """SELECT base_sample.id AS sample_id,
          LEFT JOIN base_site ON base_sample.site_id = base_site.id
          LEFT JOIN base_species ON base_species.id = rvc_species_observation.species_id
       ORDER BY rvc_species_speciesgroup.name, base_sample.date, base_sample.id, base_observer.id, base_observation.id;"""
+
 new_views['rvc_species_sites'] = """SELECT base_site.name AS site,
         rvc_species_speciesgroup.name AS species_group,
         base_site.barangay,
@@ -245,6 +248,7 @@ new_views['rvc_species_sites'] = """SELECT base_site.name AS site,
          LEFT JOIN base_sample ON base_sample.id = rvc_species_sample.id
          LEFT JOIN base_site ON base_sample.site_id = base_site.id
       GROUP BY base_site.id, base_site.name, base_site.barangay, base_site.municipality, rvc_species_speciesgroup.name;"""
+
 new_views['small_samples'] = """SELECT
             *
         FROM
@@ -269,8 +273,9 @@ new_views['small_samples'] = """SELECT
            LEFT JOIN rvc_species_speciesgroup ON rvc_species_speciesgroup.id=rvc_species_sample.speciesgroup_id
         GROUP BY base_sample.id,date,time,site, base_observation.dataset, observer, species_group) s
         WHERE max_observations_sample<12"""
+
 new_views['rvc_species_samples'] = """
-         SELECT
+          SELECT
             base_sample.id as sample_id,
             base_site.id as site_id,
             base_site.name AS site,
@@ -278,7 +283,7 @@ new_views['rvc_species_samples'] = """
             base_sample."time",
             rvc_species_speciesgroup.name AS species_group,
             array_agg(DISTINCT participants.name) AS participants
-           FROM rvc_species_sample
+          FROM rvc_species_sample
              LEFT JOIN rvc_species_speciesgroup ON rvc_species_sample.speciesgroup_id = rvc_species_speciesgroup.id
              LEFT JOIN base_sample ON base_sample.id = rvc_species_sample.id
              LEFT JOIN base_site ON base_sample.site_id = base_site.id
@@ -287,10 +292,65 @@ new_views['rvc_species_samples'] = """
           GROUP BY base_site.id, base_site.name, rvc_species_speciesgroup.name, base_sample.id, base_sample.date, base_sample."time"
           ORDER BY base_sample.date, base_sample."time", rvc_species_speciesgroup.name, base_site.name"""
 
+new_views['duplicate_observations'] = """
+          SELECT s.sample_id,
+            base_sample.date,
+            base_site.name AS site,
+            base_observer.name AS observer,
+            base_species.common_name AS species,
+            s.species_id,
+            s.score_0_9,
+            s.score_10_19,
+            s.score_20_29,
+            s.score_30_39,
+            s.score_40_49,
+            s.num_occurence,
+            s.num_identical_occurence,
+            s.observation_id,
+            s.identical_observation
+          FROM (  SELECT base_observation.sample_id,
+                    base_observation.observer_id,
+                    rvc_species_observation.species_id,
+                    rvc_species_observation.score_0_9,
+                    rvc_species_observation.score_10_19,
+                    rvc_species_observation.score_20_29,
+                    rvc_species_observation.score_30_39,
+                    rvc_species_observation.score_40_49,
+                    rvc_species_observation.id AS observation_id,
+                    count(rvc_species_observation.id) OVER (PARTITION BY rvc_species_observation.species_id, base_observation.sample_id, base_observation.observer_id) AS num_occurence,
+                    count(rvc_species_observation.id) OVER (PARTITION BY rvc_species_observation.species_id, base_observation.sample_id, base_observation.observer_id, rvc_species_observation.score_0_9, rvc_species_observation.score_10_19, rvc_species_observation.score_20_29, rvc_species_observation.score_30_39, rvc_species_observation.score_40_49) AS num_identical_occurence,
+                    min(rvc_species_observation.id) OVER (PARTITION BY rvc_species_observation.species_id, base_observation.sample_id, base_observation.observer_id, rvc_species_observation.score_0_9, rvc_species_observation.score_10_19, rvc_species_observation.score_20_29, rvc_species_observation.score_30_39, rvc_species_observation.score_40_49) AS identical_observation
+                  FROM rvc_species_observation
+                  LEFT JOIN base_observation USING (id)) s
+          LEFT JOIN base_sample ON s.sample_id = base_sample.id
+          LEFT JOIN base_species ON s.species_id = base_species.id
+          LEFT JOIN base_observer ON s.observer_id = base_observer.id
+          LEFT JOIN base_site ON base_sample.site_id = base_site.id
+          WHERE s.num_occurence > 1
+          ORDER BY s.sample_id, s.observer_id"""
+
+new_views['duplicate_species'] = """
+      SELECT s.id,
+        s.dataset,
+        s.num_occurence_common,
+        s.num_occurence_scientific,
+        s.common_name,
+        s.scientific_name
+      FROM ( SELECT base_species.id,
+               base_species.dataset,
+               count(base_species.id) OVER (PARTITION BY base_species.dataset, replace(replace(lower(base_species.common_name::text), ' '::text, ''::text), '-'::text, ''::text)) AS num_occurence_common,
+               count(base_species.id) OVER (PARTITION BY base_species.dataset, replace(replace(lower(base_species.scientific_name::text), ' '::text, ''::text), '-'::text, ''::text)) AS num_occurence_scientific,
+               base_species.common_name,
+               base_species.scientific_name
+             FROM base_species) s
+      WHERE s.num_occurence_common > 1 OR s.num_occurence_scientific > 1"""
+
 
 def upgrade():
     # commands auto generated by Alembic - please adjust! ###
     for view_name in old_views.keys():
+        op.execute("DROP VIEW IF EXISTS %s CASCADE" % view_name)
+    for view_name in new_views.keys():
         op.execute("DROP VIEW IF EXISTS %s CASCADE" % view_name)
     op.add_column('rvc_species_sample',
                   sa.Column('speciesgroup_id', sa.Integer(), nullable=True))

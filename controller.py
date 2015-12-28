@@ -22,7 +22,7 @@ def index():
     return render_template('index.html', **retval)
 
 
-@basebp.route('/<datasetname>/<clsname>/delete/<int:id>', methods=["POST"])
+@basebp.route('/<datasetname>/<clsname>/delete/<int:id>')
 def delete(datasetname, clsname, id):
     """
     Delete an sqlalchemy instance (row) from the database.
@@ -35,6 +35,7 @@ def delete(datasetname, clsname, id):
     inst = g.db.session.query(obj).get(id)
     g.db.session.delete(inst)
     del inst
+    g.db.session.commit()
     return jsonify({'success': True})
 
 

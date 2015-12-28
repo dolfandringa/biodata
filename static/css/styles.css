@@ -66,6 +66,9 @@ form[name='form_observation'] table td{
   width: 200px;
 }
 
+#ObservationList .datafield, #ObservationList .headerfield{
+  width: 100px;
+}
 #ObservationList .headerrow span.sample,
 #ObservationList .datarow span.sample{
   width: 150px;
@@ -79,7 +82,9 @@ form[name='form_observation'] table td{
   width: 120px;
 }
 #ObservationList .headerrow span.deletelink,
-#ObservationList .datarow span.deletelink{
+#ObservationList .datarow span.deletelink,
+#ObservationList .headerrow span.editlink,
+#ObservationList .datarow span.editlink{
   width: 60px;
 }
 .list .headerrow,

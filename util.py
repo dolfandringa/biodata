@@ -26,8 +26,8 @@ def store_values(obj, orm, valuedict):
     for attr in get_relation_attributes(obj):
         # get the relation attributes and set them.
         target = attr.property.mapper.entity  # target class
-        pkey = f[attr.key]  # primary key value from the valuedict
-        val = orm.query(target).get(pkey)  # get target instance from pkey
+        # get target instance from primary key value from the valuedict
+        val = orm.query(target).get(f[attr.key])
         values.append((attr.key, val))
     for attr in get_multi_relation_attributes(obj):
         target = attr.property.mapper.entity  # target class
