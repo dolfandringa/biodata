@@ -3,7 +3,7 @@ from flask import redirect, url_for, Response
 import json
 from sqlalchemy import or_, and_
 from util import get_object, get_colnames, get_values, json_desired
-from util import get_fields, get_primary_keys, store_values
+from util import get_fields, get_primary_keys, store_values, get_form_values
 import wtforms
 from werkzeug.datastructures import MultiDict, ImmutableMultiDict
 from biodata import model
@@ -73,9 +73,38 @@ def class_index(datasetname, clsname):
         return render_template('instance_list.html', **retval)
 
 
-@basebp.route("/<datasetname>/<clsname>/edit/<int:id>")
+@basebp.route("/<datasetname>/<clsname>/edit/<int:id>",
+              methods=["GET", "POST"])
 def edit(datasetname, clsname, id):
-    pass
+    """
+    Edit one specific object.
+
+    :param datasetname: The name of the dataset to edit the instance for.
+    :param clsname: The name of the class to edit the instance for.
+    :param id: The id of the instance to edit.
+    """
+    obj = get_object(datasetname, clsname)
+    inst = g.db.session.query(obj).get(id)
+    args = {'datasetname': datasetname,
+            'clsname': clsname,
+            'id': id}
+    action = url_for('.edit', **args)
+    retval = {'id': '%s' % clsname,
+              'title': 'New %s' % clsname.capitalize(),
+              'action': action}
+    if inst is None:
+        fields = {}
+        flash("%s with id %s not found" % (clsname, id))
+        retval['form'] = get_form(obj, g.db.session)
+        return render_template('form.html', **retval)
+
+    fields = get_form_values(inst)
+    if request.method == "GET":
+        retval['form'] = get_form(obj, g.db.session, values=fields)
+        return render_template('form.html', **retval)
+    else:
+        form = get_form(obj, g.db.session, data=request.form)
+        return save(obj, g.db.session, form)
 
 
 @basebp.route("/<datasetname>/<clsname>/<int:id>")
@@ -104,6 +133,12 @@ def newsample(datasetname):
     return render_template('new.html', **retval)
 
 
+@basebp.route("/<datasetname>/edit/<int:id>", methods=["POST", "GET"])
+def editsample(datasetname, id):
+    retval = {'sample_id': id}
+    return render_template('new.html', **retval)
+
+
 @basebp.route("/<datasetname>/<clsname>/new", methods=["POST", "GET"])
 def newclass(datasetname, clsname):
     obj = get_object(datasetname, clsname)
@@ -122,7 +157,7 @@ def newclass(datasetname, clsname):
         return save(obj, g.db.session, form)
 
 
-def get_form(obj, orm, data=None):
+def get_form(obj, orm, data=None, values={}):
     """
     Get the form for a new SQLAlchemy object.
 
@@ -130,7 +165,7 @@ def get_form(obj, orm, data=None):
     :param orm: The SQLALchemy session to use.
     :param data: The a request-data wrapper object with which the form should
         be filled. Typically a Werkzeug/Django/WebOb MultiDict.
-    :param datadict: A dictionary type object with data for filling the form.
+    :param inst: The SQLAlchemy instance to use to fill the form with.
     """
     fields = get_fields(obj, orm)
     fields['redirect'] = wtforms.HiddenField('redirect')
@@ -142,20 +177,23 @@ def get_form(obj, orm, data=None):
 
     for name, field in fields.items():
         setattr(formclass, name, field)
-    if data is None:
+    if data is None and values == {}:
         data = MultiDict()
     elif isinstance(data, ImmutableMultiDict):
         data = data.copy()
-    data['redirect'] = data.get('redirect', 'list')
-
-    form = formclass(formdata=data)
+    if data is not None:
+        data['redirect'] = data.get('redirect', 'list')
+    else:
+        values['redirect'] = values.get('redirect', 'list')
+    form = formclass(formdata=data, **values)
 
     for name, field in fields.items():
         # set html_attributes again as they got lost by formclass(...)
         html_attributes = getattr(field, 'html_attributes', {})
         valuefunc = getattr(field, 'valuefunc', {})
-        getattr(form, name).html_attributes = html_attributes
-        getattr(form, name).valuefunc = valuefunc
+        formfield = getattr(form, name)
+        formfield.html_attributes = html_attributes
+        formfield.valuefunc = valuefunc
 
     return form
 

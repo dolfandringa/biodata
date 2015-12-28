@@ -1,12 +1,14 @@
 from base_tests import _BaseDBTest, _BaseTest
-import datetime
-import biodata
 from biodata import model
-from biodata.util import *
-from wtforms import ValidationError, Form, StringField
+from biodata.util import get_fields, map_column_type, get_object
+from biodata.util import get_simple_columns, get_relation_attributes
+from biodata.util import get_data_attributes, get_multi_relation_attributes
+from biodata.util import get_values, validator, get_form_values
+
+import datetime
+import wtforms
+from wtforms import Form, StringField
 from wtforms.validators import InputRequired
-import tempfile
-import os
 from testmodel import TestSample, TestObservation, TestParticipant
 import types
 from collections import OrderedDict
@@ -166,6 +168,23 @@ class UtilTestDB(_BaseDBTest):
             values = get_values(site)
             self.assertEqual(values['lon'], "")
 
+    def test_get_form_values(self):
+        """
+        Test the biodata.util.get_form_values() which fetches the form values
+        for an SQLAlchemy instance.
+        """
+
+        with self.app.app_context():
+            sample = self.session.query(model.rvc_species.Sample).get(2)
+            values = get_form_values(sample)
+            self.assertEqual(len(values), 6)
+            self.assertIsInstance(values['participants'], list)
+            self.assertEqual(values['participants'], [1, 2])
+            self.assertIsInstance(values['time'], datetime.time)
+            self.assertIsInstance(values['date'], datetime.date)
+            self.assertEqual(values['site'], 1)
+            self.assertEqual(values['id'], 2)
+
     def test_get_fields(self):
         """
         The mother of them all. Test if biodata.util.get_fields results in the
@@ -179,7 +198,7 @@ class UtilTestDB(_BaseDBTest):
 
             class testForm(wtforms.Form):
                 pass
-            
+
             expected = ['time', 'date', 'participants', 'site', 'speciesgroup']
             expected = set(expected)
 
@@ -192,30 +211,29 @@ class UtilTestDB(_BaseDBTest):
             self.assertEqual(fields['site'].html_attributes,
                              {'autoFocus': True,
                               'data-values_url': '/rvc_species/site/'})
-            
+
             form = testForm()
             for label, field in fields.items():
                 fields[label] = field.bind(form, label)
                 self.assertTrue(hasattr(field, 'html_attributes'))
-            
+
             self.assertIsInstance(fields['site'], wtforms.SelectField)
-            self.assertIsInstance(fields['participants'], 
+            self.assertIsInstance(fields['participants'],
                                   wtforms.SelectMultipleField)
             self.assertTrue(hasattr(fields['date'].validators, '__iter__'))
-            
+
             with self.app.test_request_context('/'):
                 fields = get_fields(model.rvc_species.Observation, sess)
 
             expected = set(['comments', 'observer', 'sample', 'score_0_9',
-                        'score_10_19', 'score_20_29', 'score_30_39',
-                        'score_40_49', 'species'])
+                            'score_10_19', 'score_20_29', 'score_30_39',
+                            'score_40_49', 'species'])
             self.assertEqual(set(fields.keys()), expected)
-            
-            self.assertTrue(hasattr(fields['sample'].valuefunc,'__call__'))
+
+            self.assertTrue(hasattr(fields['sample'].valuefunc, '__call__'))
             self.assertFalse('choices' in fields['sample'].kwargs)
             form = testForm()
             for label, field in fields.items():
                 fields[label] = field.bind(form, label)
-            
+
             self.assertIsInstance(fields['sample'], wtforms.HiddenField)
-            

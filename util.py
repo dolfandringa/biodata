@@ -184,6 +184,34 @@ def get_values(inst):
     return OrderedDict(values)
 
 
+def get_form_values(inst):
+    """
+    Retrieves all the values for an SQLAlchemy instance (table row).
+    If converts the object into an OrderedDict where list values (like
+    one-to-many relation attributes) are converted into a list of the primary
+    keys of the relation instances. Other fields are converted to their
+    form-safe values using the wtforms widget.
+    """
+
+    values = []
+    for c in get_simple_columns(inst.__class__):
+        c = c.name
+        v = getattr(inst, c)
+        values.append((c, v))
+    for c in get_relation_attributes(inst.__class__):
+        c = c.key
+        v = getattr(inst, c)
+        v = v.id
+        values.append((c, v))
+    for c in get_multi_relation_attributes(inst.__class__):
+        c = c.key
+        v = getattr(inst, c)
+        v = [v2.id for v2 in v]
+        values.append((c, v))
+    values.append(('id', inst.id))
+    return OrderedDict(values)
+
+
 def get_simple_columns(obj):
     """
     Retrieves the 'normal' fields for an SQLAlchemy object. This excludes

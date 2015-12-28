@@ -35,16 +35,20 @@ var ObservationList = function(){
 }
 ObservationList.prototype = Object.create(formContainer.prototype);
 ObservationList.prototype.constructor = ObservationList;
-ObservationList.prototype.render = function(){
-  formContainer.prototype.render.apply(this,arguments)
+ObservationList.prototype.refresh = function(){
   jQuery.ajax({method:'get',url:this.url+'?'+jQuery.param(this.params),context:this,success:function(data){
-    this.container.html(data)
-    setModalLinks(this)
+	  this.container.html(data);
+    setModalLinks(this);
   }});
 }
+ObservationList.prototype.render = function(){
+  formContainer.prototype.render.apply(this,arguments);
+  this.refresh();
+}
+
 
 var ObservationForm = function(){
-  this.url='observation/new';
+  this.url='/rvc_species/observation/new';
   formContainer.call(this, id='observationForm', classes=[]);
 }
 ObservationForm.prototype = Object.create(formContainer.prototype);
@@ -99,7 +103,7 @@ ObservationForm.prototype.setAjaxForm = function(){
         setModalLinks(obsForm);
         obsForm.setSaveButtons();
         obsForm.container.find('ul.messages').html("<li class='message'>Observation saved.</li>");
-        obsList.render({sample_id:obsForm.params['sample']});
+        obsList.refresh();
       },
       error:function(data,textStatus){
         console.log('error');

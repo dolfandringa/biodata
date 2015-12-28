@@ -35,16 +35,19 @@ var ObservationList = function(){
 }
 ObservationList.prototype = Object.create(formContainer.prototype);
 ObservationList.prototype.constructor = ObservationList;
-ObservationList.prototype.render = function(){
-  formContainer.prototype.render.apply(this,arguments)
+ObservationList.prototype.refresh = function(){
   jQuery.ajax({method:'get',url:this.url+'?'+jQuery.param(this.params),context:this,success:function(data){
-	  this.container.html(data)
-    setModalLinks(this)
+	  this.container.html(data);
+    setModalLinks(this);
   }});
+}
+ObservationList.prototype.render = function(){
+  formContainer.prototype.render.apply(this,arguments);
+  this.refresh();
 }
 
 var ObservationForm = function(){
-  this.url='observation/new';
+  this.url='{{url_for("/.newclass", datasetname=request.view_args["datasetname"],clsname="observation")}}';
   formContainer.call(this, id='observationForm', classes=[]);
 }
 ObservationForm.prototype = Object.create(formContainer.prototype);
@@ -99,7 +102,7 @@ ObservationForm.prototype.setAjaxForm = function(){
         setModalLinks(obsForm);
         obsForm.setSaveButtons();
         obsForm.container.find('ul.messages').html("<li class='message'>Observation saved.</li>");
-        obsList.render({sample_id:obsForm.params['sample']});
+        obsList.refresh();
       },
       error:function(data,textStatus){
         console.log('error');
@@ -174,7 +177,18 @@ var obsForm = new ObservationForm();
 var samForm = new SampleForm();
 
 jQuery(document).ready(function(){
+{% if sample_id is defined %}
+  var sample_url='{{ url_for("/.edit",clsname="sample",id=sample_id,datasetname=request.view_args['datasetname']) }}';
+  var obslist_url='{{ url_for("/.class_index",clsname="observation",datasetname=request.view_args['datasetname']) }}';
+  var sampleid={{sample_id}};
+  samForm.url=sample_url;
+  obsList.url = obslist_url;
   samForm.render();
+  obsList.render({sample_id: sampleid});
+  obsForm.render({sample: sampleid});
+{% else %}
+  samForm.render();
+{% endif %}
 });
 </script>
 </head>

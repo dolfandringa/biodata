@@ -63,7 +63,6 @@ function openWaitDialog(message){
   jQuery('body').append(dialog);
   dialog.find('.icon').activity({segments: 8, width:4, space: 0, length: 3, color: '#0b0b0b', speed: 1.5});
   dialog = dialog.dialog({
-    dialogClass: 'no-close',
     autoOpen: false,
     width: 400,
     height: 200,
@@ -89,6 +88,29 @@ function closeWaitDialog(dialog,message){
 
 function setModalLinks(container){
   obj=container.container;
+  obj.find('a.editlink').click(function(e){
+    container=jQuery(this).parent();
+    url=jQuery(this).attr('href');
+    dialog=jQuery("<div class='modalForm'><iframe src='"+url+"'></iframe></div>");
+    jQuery('body').append(dialog);
+    dialog = dialog.dialog({
+      autoOpen: false,
+      width: 900,
+      height: 600,
+      modal: true,
+      buttons: {
+        Save: function(){
+          jQuery(this).find("iframe").contents().find("form").submit();
+          obsList.refresh();
+        }
+      }
+    });
+    dialog.dialog("open");
+    dialog.find('iframe').load(function(){
+      cleanupModalForm(dialog,container);
+    });
+    return false;
+  });
   obj.find('a.addlink').click(function(e){
     container=jQuery(this).parent()
     url=jQuery(this).attr('href')
@@ -116,10 +138,7 @@ function setModalLinks(container){
     dialog=openWaitDialog('Just a moment please.')
     jQuery.get(url,function(){
       closeWaitDialog(dialog);
-      sampleid=samForm.container.find("input[name='id']").val();
-      if(sampleid!=undefined){
-            obsList.render({sample_id:sampleid})
-      }
+      obsList.refresh()
     });
     return false;
   });
