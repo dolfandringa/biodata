@@ -17,6 +17,29 @@ sample_participants = Table(
 
 
 class BaseSample(Base):
+    """
+    These are SQLAlchemy Declarative objects with a few additions.
+    The fields for each object are just defined as a column of a certain type.
+    This is basic SQLAlchemy notation. The same holds for relationships.
+
+    The following are extra attributes added for the automatic display and
+    rendering of the form:
+
+    Formfields is a dictionary where the keys match a field, and the value of
+    the dict is another dict with parameters for that field. For now the
+    parameters are:
+        skip: boolean. If true, this field will not be included in the form.
+        widget: a string specifying the wtform field type.
+        html_attributes: attributes that are used when rendering the form field
+            to add extra html attributes to the tag.
+        kwargs: extra keyword arguments to the wtforms field, needed for
+            rendering
+
+    Sort is a list specifying which fields should be used for sorting the
+    object in lists. Each list item is a tuple with the first item the field
+    name and the second item a boolean specifying if the field should be orderd
+    in descending order (if False it will be ordered in ascending order).
+    """
     __tablename__ = 'base_sample'
     pretty_name = 'sample'
     formfields = {}
@@ -35,6 +58,7 @@ class BaseSample(Base):
     __mapper_args__ = {'polymorphic_identity': 'base',
                        'polymorphic_on': dataset}
     formfields['dataset'] = {'skip': True}
+    _sort = [('date', True), ('time', True)]
 
     def __str__(self):
         return "%s at %s" % (self.id, self.site.name)
@@ -44,6 +68,7 @@ class BaseObserver(Base):
     __tablename__ = "base_observer"
     pretty_name = 'observer'
     formfields = {}
+    _sort = [('name', False)]
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, nullable=False)
 
@@ -60,6 +85,7 @@ class BaseObservation(Base):
     __tablename__ = "base_observation"
     pretty_name = 'observation'
     formfields = {}
+    _sort = [('id', False)]
     id = Column(Integer, primary_key=True)
     comments = Column(UnicodeText)
     observer_id = Column(Integer, ForeignKey("base_observer.id"))
@@ -86,6 +112,7 @@ class BaseSite(Base):
     __tablename__ = "base_site"
     pretty_name = 'site'
     formfields = {}
+    _sort = [('municipality', False), ('barangay', False), ('name', False)]
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, nullable=False)
     barangay = Column(Unicode)
@@ -108,6 +135,7 @@ class BaseSpecies(Base):
     __tablename__ = "base_species"
     pretty_name = 'species'
     formfields = {}
+    _sort = [('common_name', False)]
     id = Column(Integer, primary_key=True)
     common_name = Column(Unicode)
     scientific_name = Column(Unicode)

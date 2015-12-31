@@ -90,13 +90,13 @@ function setModalLinks(container){
   obj=container.container;
   obj.find('a.editlink').click(function(e){
     e.preventDefault();
-    alert('clicked a link');
     container=jQuery(this).parent();
     url=jQuery(this).attr('href');
     d=jQuery("<div class='modalForm'><iframe src='"+url+"'></iframe></div>");
     jQuery('body').append(d);
     d = d.dialog({
       autoOpen: false,
+      position: {my: 'center top', at: 'center top'},
       width: 900,
       height: 600,
       modal: true,
@@ -120,6 +120,7 @@ function setModalLinks(container){
     jQuery('body').append(dialog);
     dialog = dialog.dialog({
       autoOpen: false,
+      position: {my: 'center top', at: 'center top'},
       width: 400,
       height: 400,
       modal: true,

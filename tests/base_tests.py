@@ -70,9 +70,8 @@ def load_data(session):
     add(sample1)
 
     sample2 = model.rvc_species.Sample()
-    sample2.name = u'test2'
     sample2.date = datetime.datetime(2015, 11, 18)
-    sample2.time = datetime.datetime(2015, 11, 18, 21, 38, 39, 882212)
+    sample2.time = datetime.datetime(2015, 11, 18, 21, 38, 40, 882212)
     sample2.participants = [dolf, annelies]
     sample2.site = guinsuan
     sample2.speciesgroup = specgroup

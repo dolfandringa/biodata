@@ -171,6 +171,34 @@ class ControllerTest(_BaseDBTest):
         self.assertIsInstance(result[1][0], int)
         self.assertEqual(len(result[1]), 2)
 
+    def test_list_sort(self):
+        """
+        Test the sort order of the list controller.
+        """
+        endpt = "/rvc_species/observer/"
+        print("Fetching %s" % endpt)
+        headers = {'Accept': 'application/json'}
+        response = self.client.get(endpt,
+                                   content_type='application/json',
+                                   headers=headers)
+        self.assertEqual(response.status_code, 200)
+        result = response.get_data(as_text=True)
+        result = json.loads(result)
+        print(result)
+        self.assertEqual(result[0][1], 'annelies')
+        self.assertEqual(result[1][1], 'dolf')
+        endpt = "/rvc_species/sample/"
+        print("Fetching %s" % endpt)
+        headers = {'Accept': 'application/json'}
+        response = self.client.get(endpt,
+                                   content_type='application/json',
+                                   headers=headers)
+        self.assertEqual(response.status_code, 200)
+        result = response.get_data(as_text=True)
+        result = json.loads(result)
+        print(result)
+        self.assertEqual(result[0][0], 2)
+
     def test_list(self):
         """
         Test the list controller without selection parameters.
@@ -252,7 +280,7 @@ class ControllerTest(_BaseDBTest):
 
         # two values for one field should result in them being OR-ed
         url = '/rvc_species/sample/?date="2015-11-18"&time="21:38:39.881432"'
-        url = '%s&time="21:38:39.882212"' % url
+        url = '%s&time="21:38:40.882212"' % url
         response = self.client.get(url)
         d = pq(response.get_data(as_text=True))
         self.assertEqual(len(d(".datarow")), 2)

@@ -40,8 +40,8 @@ class Observation(BaseObservation):
     # deepcopy the formfields so we are not altering the mutable for other
     # BaseObservation instances
     formfields = copy.deepcopy(BaseObservation.formfields)
-    formfields['size'] = {'kwargs': {'post': " size in whole cm"}}
-    formfields['depth'] = {'kwargs': {'post':
+    formfields['size'] = {'kwargs': {'description': " size in whole cm"}}
+    formfields['depth'] = {'kwargs': {'description':
                                       " depth in m (with decimal numbers)"}}
     species_id = Column(Integer, ForeignKey("clams_species.id"))
     species = relationship("model.clams.Species", backref="observations")

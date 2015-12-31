@@ -51,16 +51,31 @@ def class_index(datasetname, clsname):
     params = []
     obj = get_object(datasetname, clsname)
     for k in request.args.keys():
+        # Get query parameters from the query string
         v = request.args.getlist(k)
         if isinstance(v, list) and len(v) > 1:
             v = or_(*[getattr(obj, k) == v1 for v1 in v])
         elif isinstance(v, list):
             v = getattr(obj, k) == v[0]
         params.append(v)
+
+    instances = g.db.session.query(obj)  # Start building the query
+
     if params:
-        instances = g.db.session.query(obj).filter(and_(*params)).all()
-    else:
-        instances = g.db.session.query(obj).all()
+        # Filter the instances if we got parameters in the querystring
+        instances = instances.filter(and_(*params))
+
+    if hasattr(obj, '_sort'):
+        # Sort the instances if a sort key was specified in the model
+        sortfields = []
+        for field, desc in obj._sort:
+            sortfield = getattr(obj, field)
+            if desc:
+                sortfield = sortfield.desc()
+            sortfields.append(sortfield)
+        instances = instances.order_by(*sortfields)
+
+    instances = instances.all()  # Get all instances
     if json_desired():
         data = [(s.id, str(s)) for s in instances]
         return Response(json.dumps(data),  mimetype='application/json')

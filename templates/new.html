@@ -39,6 +39,7 @@ ObservationList.prototype.refresh = function(){
   jQuery.ajax({method:'get',url:this.url+'?'+jQuery.param(this.params),context:this,success:function(data){
 	  this.container.html(data);
     setModalLinks(this);
+    $(window).scrollTop($(window).height());
   }});
 }
 ObservationList.prototype.render = function(){

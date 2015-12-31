@@ -18,7 +18,7 @@ if (!Array.prototype.last){
 };
 jQuery(document).ready(function(){
   jQuery("#dataset").change(function(e){
-    url=jQuery(this).val()+'/new' 
+    url=jQuery(this).val()+'/sample/' 
     console.log('redirecting to '+url);
     window.location.replace(url);
   });
