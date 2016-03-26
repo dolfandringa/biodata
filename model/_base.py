@@ -35,10 +35,20 @@ class BaseSample(Base):
         kwargs: extra keyword arguments to the wtforms field, needed for
             rendering
 
-    Sort is a list specifying which fields should be used for sorting the
+    _sort is a list specifying which fields should be used for sorting the
     object in lists. Each list item is a tuple with the first item the field
     name and the second item a boolean specifying if the field should be orderd
     in descending order (if False it will be ordered in ascending order).
+
+    _auto_add_instance_fields is a list of relation attributes for which an
+    instance of this class needs to be shown in the form. Multiple relation
+    attributes can be specified to render a form row of each of the possible
+    combinations of the fields in _auto_add_instance_fields.
+    As an example, let's say the Observation class has an attribute species
+    pointing to a Species class, specifying species in the
+    _auto_add_instance_fields list of Observation will make the form where
+    observations are added automatically be filled with a row for each value of
+    the Species object.
     """
     __tablename__ = 'base_sample'
     pretty_name = 'sample'
@@ -59,6 +69,7 @@ class BaseSample(Base):
                        'polymorphic_on': dataset}
     formfields['dataset'] = {'skip': True}
     _sort = [('date', True), ('time', True)]
+    _auto_add_instance_fields = []
 
     def __str__(self):
         return "%s at %s" % (self.id, self.site.name)
@@ -76,6 +87,7 @@ class BaseObserver(Base):
     __mapper_args__ = {'polymorphic_identity': 'base',
                        'polymorphic_on': dataset}
     formfields['dataset'] = {'skip': True}
+    _auto_add_instance_fields = []
 
     def __str__(self):
         return "%s" % self.name
@@ -101,6 +113,7 @@ class BaseObservation(Base):
     __mapper_args__ = {'polymorphic_identity': 'base',
                        'polymorphic_on': dataset}
     formfields['dataset'] = {'skip': True}
+    _auto_add_instance_fields = []
 
     def __str__(self):
         return "Observation %i on %s at %s" % (self.id,
@@ -124,6 +137,7 @@ class BaseSite(Base):
     __mapper_args__ = {'polymorphic_identity': 'base',
                        'polymorphic_on': dataset}
     formfields['dataset'] = {'skip': True}
+    _auto_add_instance_fields = []
 
     def __str__(self):
         return "%s, %s, %s" % (self.name,
@@ -144,6 +158,7 @@ class BaseSpecies(Base):
     __mapper_args__ = {'polymorphic_identity': 'base',
                        'polymorphic_on': dataset}
     formfields['dataset'] = {'skip': True}
+    _auto_add_instance_fields = []
 
     def __str__(self):
         return self.common_name

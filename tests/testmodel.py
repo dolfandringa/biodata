@@ -45,3 +45,4 @@ class TestObservation(Base):
     name = Column(Unicode, nullable=False)
     sample_id = Column(Integer, ForeignKey('testsample.id'), nullable=False)
     sample = relationship("TestSample", backref="observations")
+    _show_all_fields = ['name']

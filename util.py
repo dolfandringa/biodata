@@ -96,9 +96,33 @@ def validator(message, func):
     return wrapper
 
 
+class NumericWidget(wtforms.widgets.TextInput):
+    input_type = 'text'
+
+    def __call__(self, field, **kwargs):
+        c = kwargs.pop('class', '') or kwargs.pop('class_', '')
+        kwargs['class'] = u'%s %s' % ('numeric', c)
+        return super(NumericWidget, self).__call__(field, **kwargs)
+
+
+class SmallIntWidget(wtforms.widgets.TextInput):
+    input_type = 'text'
+
+    def __call__(self, field, **kwargs):
+        c = kwargs.pop('class', '') or kwargs.pop('class_', '')
+        kwargs['class'] = u'%s %s' % ('smallint', c)
+        return super(SmallIntWidget, self).__call__(field, **kwargs)
+
+
 __type_map = {
-    sa_types.Integer: {'widget': wtforms.IntegerField},
-    sa_types.Numeric: {'widget': wtforms.DecimalField},
+    sa_types.Integer: {
+        'widget': wtforms.IntegerField,
+        'kwargs': {'widget': SmallIntWidget()}
+    },
+    sa_types.Numeric: {
+        'widget': wtforms.DecimalField,
+        'kwargs': {'widget': NumericWidget()}
+    },
     sa_types.Unicode: {'widget': wtforms.StringField},
     sa_types.String: {'widget': wtforms.StringField},
     sa_types.UnicodeText: {'widget': wtforms.TextAreaField},
@@ -145,7 +169,7 @@ def get_data_attributes(obj):
         if not hasattr(attr, 'property'):
             continue
         if hasattr(obj, 'formfields') and prop in obj.formfields.keys() and \
-                obj.formfields[prop].get('skip', False) == True:
+                obj.formfields[prop].get('skip', False) is True:
             # This property should be skipped for the interface
             continue
         yield attr

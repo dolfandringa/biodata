@@ -17,52 +17,52 @@
 <ul class="messages">
 </ul>
 <form name="form_observation" method="post" action="/rvc_species/observation/new" > 
-<table>
-    <tr>
-    	<th><label for="observer">observer</label></th>
-    	<td><select autoFocus data-values_url="/rvc_species/observer/" id="observer" name="observer"><option value="2">annelies</option><option value="1">dolf</option></select><a class='addlink' href='/rvc_species/observer/new'>Add observer</a> </td>
-	</tr>
-    <tr style="display: none;">
-    	<th><label for="sample">sample</label></th>
-    	<td><input data-values_url="/rvc_species/sample/" id="sample" name="sample" type="hidden" value="25"><a class='addlink' href='/rvc_species/sample/new'>Add sample</a> </td>
-	</tr>
-    <tr>
-    	<th><label for="species">species</label></th>
-    	<td><select data-values_url="/rvc_species/species/" id="species" name="species"><option value="1">com0</option><option value="2">com1</option><option value="3">com2</option><option value="4">com3</option><option value="5">com4</option><option value="6">com5</option><option value="7">com6</option><option value="8">com7</option><option value="9">com8</option><option value="10">com9</option></select><a class='addlink' href='/rvc_species/species/new'>Add species</a> </td>
-	</tr>
-    <tr>
-    	<th><label for="comments">comments</label></th>
-    	<td><textarea id="comments" name="comments"></textarea></td>
-    </tr>
-    <tr>
-    	<th><label for="score_0_9">score_0_9</label></th>
-    	<td><input id="score_0_9" name="score_0_9" type="text" value=""></td>
-	</tr>
-    <tr>
-    	<th><label for="score_10_19">score_10_19</label></th>
-    	<td><input id="score_10_19" name="score_10_19" type="text" value=""></td>
-    </tr>
-    <tr>
-    	<th><label for="score_20_29">score_20_29</label></th>
-    	<td><input id="score_20_29" name="score_20_29" type="text" value=""></td>
-	</tr>
-    <tr>
-    	<th><label for="score_30_39">score_30_39</label></th>
-    	<td><input id="score_30_39" name="score_30_39" type="text" value=""></td>
-	</tr>
-    <tr>
-    	<th><label for="score_40_49">score_40_49</label></th>
-    	<td><input id="score_40_49" name="score_40_49" type="text" value=""></td>
-    </tr>
-    <tr style="display: none;">
-    	<th><label for="redirect">redirect</label></th>
-    	<td><input id="redirect" name="redirect" type="hidden" value="list"></td>
-    </tr>
-    <tr style="display: none;">
-    	<th><label for="id">id</label></th>
-    	<td><input id="id" name="id" type="hidden" value=""></td>
-    </tr>
-</table>
+<fieldset class='formrow'>
+    	<div class='formfield'>
+        <label for="observer">observer</label>
+        <select autoFocus data-values_url="/rvc_species/observer/" id="observer" name="observer"><option value="2">annelies</option><option value="1">dolf</option></select><a class='addlink' href='/rvc_species/observer/new'>Add observer</a> 
+      </div>
+    	<div class='formfield' style="display: none;">
+        <label for="sample">sample</label>
+    	  <input data-values_url="/rvc_species/sample/" id="sample" name="sample" type="hidden" value="25"><a class='addlink' href='/rvc_species/sample/new'>Add sample</a> 
+      </div>
+    	<div class='formfield'>
+        <label for="species">species</label>
+    	<select data-values_url="/rvc_species/species/" id="species" name="species"><option value="1">com0</option><option value="2">com1</option><option value="3">com2</option><option value="4">com3</option><option value="5">com4</option><option value="6">com5</option><option value="7">com6</option><option value="8">com7</option><option value="9">com8</option><option value="10">com9</option></select><a class='addlink' href='/rvc_species/species/new'>Add species</a> 
+      </div>
+    	<div class='formfield'>
+        <label for="comments">comments</label>
+    	<textarea id="comments" name="comments"></textarea>
+      </div>
+    	<div class='formfield'>
+        <label for="score_0_9">score_0_9</label>
+    	  <input class="smallint " id="score_0_9" name="score_0_9" type="text" value="">
+      </div>
+    	<div class='formfield'>
+        <label for="score_10_19">score_10_19</label>
+    	  <input class="smallint " id="score_10_19" name="score_10_19" type="text" value="">
+      </div>
+    	<div class='formfield'>
+        <label for="score_20_29">score_20_29</label>
+    	  <input class="smallint " id="score_20_29" name="score_20_29" type="text" value="">
+      </div>
+    	<div class='formfield'>
+        <label for="score_30_39">score_30_39</label>
+    	  <input class="smallint " id="score_30_39" name="score_30_39" type="text" value="">
+      </div>
+    	<div class='formfield'>
+        <label for="score_40_49">score_40_49</label>
+    	  <input class="smallint " id="score_40_49" name="score_40_49" type="text" value="">
+      </div>
+    	<div class='formfield' style="display: none;">
+        <label for="redirect">redirect</label>
+    	  <input id="redirect" name="redirect" type="hidden" value="list">
+      </div>
+    	<div class='formfield' style="display: none;">
+        <label for="id">id</label>
+    	  <input id="id" name="id" type="hidden" value="">
+      </div>
+</fieldset>
 </form>
 <button name="save" onclick="alert('test');jQuery('form[name=form_observation]').submit()">Save</button>
 <button name="save_new" onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_observation]').submit();">Save and New</button>

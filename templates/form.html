@@ -15,23 +15,31 @@
 <body>
 <div>
 {% from "_form_helpers.html" import render_field %}
+{% set vars = {'errors': False} %}
+{% for form in forms %}
+  {% if form['form'].errors %}
+    {% if vars.update({'errors': True}) %}{% endif %}
+  {% endif %}
+{% endfor %}
 <ul class="messages">
-  {% if form.errors %} <li class="error">An error occured. Please try again.</li> {% endif %}
+    {% if vars.errors %} <li class="error">An error occured. Please try again.</li> {% endif %}
 </ul>
-<form name="form_{{ id }}" method="post" {% if action is defined %}action="{{ action }}" {% endif %}> 
-	<table>
-	{% for field in form %}
+{% for form in forms %}
+<form name="form_{{ form['id'] }}" method="post" {% if 'action' in form %}action="{{ form['action'] }}" {% endif %}> 
+	<fieldset class='formrow'>
+	{% for field in form['form'] %}
 		{{ render_field(field) }}
 	{% endfor %}
-	</table>
+	</fieldset>
 </form>
-<button name="save" onclick="alert('test');jQuery('form[name=form_{{ id }}]').submit()">Save</button>
-<button name="save_new" onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_{{ id }}]').submit();">Save and New</button>
+<button name="save" onclick="alert('test');jQuery('form[name=form_{{ form['id'] }}]').submit()">Save</button>
+<button name="save_new" onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_{{ form['id'] }}]').submit();">Save and New</button>
 <script type='text/javascript'>
   jQuery(document).ready(function(){
-    jQuery("form[name=form_{{ id }}] select").select2();
+    jQuery("form[name=form_{{ form['id'] }}] select").select2();
   });
 </script>
+{% endfor %}
 </div>
 </body>
 </html>

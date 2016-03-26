@@ -50,6 +50,20 @@ class ControllerTest(_BaseDBTest):
                 expected = re.sub(self.whitespace_re, "", expected)
                 self.assertMultiLineEqual(expected, result)
 
+    def test_auto_add_fields(self):
+        """
+        Test the automatic addtion of form rows for model objects that specify
+        the _auto_add_instance_fields.
+        """
+
+        endpt = "/inverts/observation/new"
+        print("Fetching %s" % endpt)
+        response = self.client.get(endpt)
+        self.assertEqual(response.status_code, 200)
+        result = response.get_data(as_text=True)
+        d = pq(result)
+        self.assertEqual(len(d("fieldset.formrow")), 10)
+
     def test_form_submission_error(self):
         """
         Testing if submitting an empty form results in validation errors.
@@ -58,7 +72,9 @@ class ControllerTest(_BaseDBTest):
         data = {}
         response = self.client.post('/rvc_species/observer/new', data=data)
         self.assertEqual(response.status_code, 200)
-        d = pq(response.get_data(as_text=True))
+        result = response.get_data(as_text=True)
+        print(result)
+        d = pq(result)
         self.assertEqual(len(d(".error")), 2)
 
     def test_form_submission_redirect(self):

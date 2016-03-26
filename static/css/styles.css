@@ -1,3 +1,13 @@
+ul.menu, ul.menu li{
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+}
+ul.menu li{
+  margin: 0px 0px 0px 5px;
+  display: inline-block;
+}
+
 input,select{
   margin: 2px 0px;
 }
@@ -45,16 +55,21 @@ input{
 .select2-container{
   min-width: 150px;
 }
-form[name='form_observation'] table tr{
-  display: inline-block;
-  margin: 5px;
+form fieldset{
+  border: none;
+  margin: 0px;
+  padding: 0px;
 }
-form[name='form_observation'] table th,
-form[name='form_observation'] table td{
-  min-width: 150px;
-  text-align: left;
+form[name='form_observation'] fieldset.formrow .formfield{
   display: block;
-  margin: 5px 0px;
+  float: left;
+  margin: 0px 5px;
+  height: 80px;
+}
+form[name='form_observation'] fieldset.formrow .formfield label
+{
+  display: block;
+  line-height: 40px;
 }
 
 #sampleForm .datafield{
@@ -76,10 +91,10 @@ form[name='form_observation'] table td{
 #ObservationList .datarow span.observer{
   width: 120px;
 }
-#ObservationList .headerrow span.deletelink,
-#ObservationList .datarow span.deletelink,
-#ObservationList .headerrow span.editlink,
-#ObservationList .datarow span.editlink{
+.headerrow span.deletelink,
+.datarow span.deletelink,
+.headerrow span.editlink,
+.datarow span.editlink{
   width: 60px;
 }
 .list .headerrow,
@@ -135,3 +150,9 @@ ul.messages li.message{
 .no-close .ui-dialog-titlebar-close {
   display: none;
 }
+
+input.smallint{
+  width: 40px;
+  max-width: 40px;
+}
+

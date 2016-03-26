@@ -55,7 +55,8 @@ class UtilTest(_BaseTest):
 
     def test_map_column_type(self):
         """
-        Tests the mapping of column types.
+        Tests the mapping of column types. Also tests if extra attributes
+        are being conserved in the process.
         """
 
         inputRequired = wtforms.validators.InputRequired
@@ -79,6 +80,7 @@ class UtilTest(_BaseTest):
         self.assertEqual(type['widget'], wtforms.StringField)
         self.assertEqual(type['html_attributes'], {})
         self.assertIsInstance(type['args'][0], inputRequired)
+        type = map_column_type(TestObservation.name)
 
     def test_get_object(self):
         """

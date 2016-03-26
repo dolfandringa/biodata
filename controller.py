@@ -4,7 +4,9 @@ import json
 from sqlalchemy import or_, and_
 from util import get_object, get_colnames, get_values, json_desired
 from util import get_fields, get_primary_keys, store_values, get_form_values
+from util import get_relation_attributes
 import wtforms
+import itertools
 from werkzeug.datastructures import MultiDict, ImmutableMultiDict
 from biodata import model
 
@@ -104,18 +106,19 @@ def edit(datasetname, clsname, id):
             'clsname': clsname,
             'id': id}
     action = url_for('.edit', **args)
-    retval = {'id': '%s' % clsname,
-              'title': 'New %s' % clsname.capitalize(),
-              'action': action}
+    retval = {'title': 'New %s' % clsname.capitalize(),
+              'forms': [
+                        {'id': '%s' % clsname,
+                         'action': action}]}
     if inst is None:
         fields = {}
         flash("%s with id %s not found" % (clsname, id))
-        retval['form'] = get_form(obj, g.db.session)
+        retval['forms'][0]['form'] = get_form(obj, g.db.session)
         return render_template('form.html', **retval)
 
     fields = get_form_values(inst)
     if request.method == "GET":
-        retval['form'] = get_form(obj, g.db.session, values=fields)
+        retval['forms'][0]['form'] = get_form(obj, g.db.session, values=fields)
         return render_template('form.html', **retval)
     else:
         form = get_form(obj, g.db.session, data=request.form)
@@ -161,11 +164,28 @@ def newclass(datasetname, clsname):
         args = {'datasetname': datasetname,
                 'clsname': clsname}
         action = url_for('.newclass', **args)
-        form = get_form(obj, g.db.session, data=request.args.copy())
-        retval = {'id': '%s' % clsname,
-                  'title': 'New %s' % clsname.capitalize(),
-                  'form': form,
-                  'action': action}
+        form_values = request.args.copy()
+        rel_attrs = dict([(attr.key, attr.property.mapper.entity)
+                          for attr in get_relation_attributes(obj)])
+        values = []
+        for f in obj._auto_add_instance_fields:
+            if f in rel_attrs.keys():
+                values.append(
+                    [(f, v.id) for v in g.db.session.query(rel_attrs[f]).all()]
+                )
+        if values == []:
+            values = [form_values]
+        else:
+            values = [MultiDict(i) for i in itertools.product(*values)]
+            for v in values:
+                v.update(form_values)
+        retval = {'title': 'New %s' % clsname.capitalize(),
+                  'forms': []}
+        for i, v in enumerate(values):
+            form = get_form(obj, g.db.session, data=v)
+            retval['forms'].append({'id': '%s' % (clsname,),
+                                    'form': form,
+                                    'action': action})
         return render_template('form.html', **retval)
     else:
         form = get_form(obj, g.db.session, data=request.form)
@@ -229,10 +249,11 @@ def save(obj, orm, form):
     action = url_for('.newclass', **args)
     if not form.validate():
         # Validation failed. Back to the form with the error message
-        retval = {'id': "%s_%s" % (datasetname, clsname),
-                  'title': "New %s" % clsname.capitalize(),
-                  'form': form,
-                  'action': action}
+        retval = {'title': "New %s" % clsname.capitalize(),
+                  'forms': [
+                      {'id': "%s_%s" % (datasetname, clsname),
+                       'form': form,
+                       'action': action}]}
         return render_template('form.html', **retval)
 
     inst = store_values(obj, orm, form.data)
@@ -250,10 +271,11 @@ def save(obj, orm, form):
                     source.append((field.name, field.data))
             source = MultiDict(source)
             form = get_form(obj, orm, data=source)
-            retval = {'form': form,
-                      'id': "%s" % clsname,
-                      'title': 'New %s' % clsname.capitalize(),
-                      'action': action}
+            retval = {'title': 'New %s' % clsname.capitalize(),
+                      'forms': [
+                          {'form': form,
+                           'id': "%s" % clsname,
+                           'action': action}]}
             return render_template('form.html', **retval)
         else:
             # show the added item
@@ -266,10 +288,11 @@ def save(obj, orm, form):
     elif form.redirect.data == u'form':
         # redirect to the form again, empty values in the form first
         form = get_form(obj, orm, data=MultiDict({'redirect': 'form'}))
-        retval = {'form': form,
-                  'id': "%s" % clsname,
-                  'title': 'New %s' % clsname.capitalize(),
-                  'action': action}
+        retval = {'title': 'New %s' % clsname.capitalize(),
+                  'forms': [
+                      {'form': form,
+                       'id': "%s" % clsname,
+                       'action': action}]}
         return render_template('form.html', **retval)
     else:
         # redirect to the list page

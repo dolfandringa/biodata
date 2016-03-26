@@ -17,24 +17,24 @@
 <ul class="messages">
 </ul>
 <form name="form_species" method="post" action="/rvc_species/species/new" > 
-<table>
-    <tr>
-    	<th><label for="common_name">common_name</label></th>
-    	<td><input autoFocus id="common_name" name="common_name" type="text" value=""></td>
-    </tr>
-    <tr>
-    	<th><label for="scientific_name">scientific_name</label></th>
-    	<td><input id="scientific_name" name="scientific_name" type="text" value=""></td>
-    </tr>
-    <tr style="display: none;">
-    	<th><label for="redirect">redirect</label></th>
-		<td><input id="redirect" name="redirect" type="hidden" value="list"></td>
-	</tr>
-	<tr style="display: none;">
-    	<th><label for="id">id</label></th>
-		<td><input id="id" name="id" type="hidden" value=""></td>
-	</tr>
-</table>
+<fieldset class='formrow'>
+    <div class='formfield'>
+      <label for="common_name">common_name</label>
+      <input autoFocus id="common_name" name="common_name" type="text" value="">
+    </div>
+    <div class='formfield'>
+      <label for="scientific_name">scientific_name</label>
+      <input id="scientific_name" name="scientific_name" type="text" value="">
+    </div>
+  	<div class='formfield' style="display: none;">
+      <label for="redirect">redirect</label>
+		  <input id="redirect" name="redirect" type="hidden" value="list">
+    </div>
+    <div class='formfield' style="display: none;">
+      <label for="id">id</label>
+		  <input id="id" name="id" type="hidden" value="">
+    </div>
+</fieldset>
 </form>
 <button name="save" onclick="alert('test');jQuery('form[name=form_species]').submit()">Save</button>
 <button name="save_new" onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_species]').submit();">Save and New</button>
@@ -46,3 +46,4 @@
 </div>
 </body>
 </html>
+

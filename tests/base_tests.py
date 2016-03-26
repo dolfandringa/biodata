@@ -90,4 +90,10 @@ def load_data(session):
         obs.species = session.query(model.rvc_species.Species).get(i)
         add(obs)
 
+    for i in range(10):
+        spec = model.inverts.Species()
+        spec.scientific_name = u'sci%i' % i
+        spec.common_name = u'com%i' % i
+        add(spec)
+
     session.commit()

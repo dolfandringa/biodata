@@ -17,36 +17,38 @@
 <ul class="messages">
 </ul>
 <form name="form_sample" method="post" action="/rvc_species/sample/new" > 
-<table>
-    <tr>
-    	<th><label for="site">site</label></th>
-    	<td><select autoFocus data-values_url="/rvc_species/site/" id="site" name="site"><option value="1">guinsuan, , </option></select><a class='addlink' href='/rvc_species/site/new'>Add site</a> </td>
-	</tr>
-    <tr>
-    	<th><label for="speciesgroup">speciesgroup</label></th>
-    	<td><select data-values_url="/rvc_species/speciesgroup/" id="speciesgroup" name="speciesgroup"><option value="1">TestSpecGroup</option></select><a class='addlink' href='/rvc_species/speciesgroup/new'>Add speciesgroup</a> </td>
-	</tr>
-    <tr>
-    	<th><label for="participants">participants</label></th>
-    	<td><select data-values_url="/rvc_species/observer/" id="participants" multiple name="participants"><option value="2">annelies</option><option value="1">dolf</option></select><a class='addlink' href='/rvc_species/observer/new'>Add observer</a> </td>
-	</tr>
-    <tr>
-    	<th><label for="date">date</label></th>
-    	<td><input id="date" name="date" type="text" value=""> format: YYYY-MM-DD </td>
-    </tr>
-    <tr>
-    	<th><label for="time">time</label></th>
-    	<td><input id="time" name="time" type="text" value=""> format: HH:MM </td>
-    </tr>
-    <tr style="display: none;">
-    	<th><label for="redirect">redirect</label></th>
-    	<td><input id="redirect" name="redirect" type="hidden" value="list"></td>
-    </tr>
-    <tr style="display: none;">
-    	<th><label for="id">id</label></th>
-    	<td><input id="id" name="id" type="hidden" value=""></td>
-    </tr>
-</table>
+<fieldset class='formrow'>
+    	<div class='formfield'>
+        <label for="site">site</label>
+    	  <select autoFocus data-values_url="/rvc_species/site/" id="site" name="site"><option value="1">guinsuan, , </option></select><a class='addlink' href='/rvc_species/site/new'>Add site</a> 
+      </div>
+    	<div class='formfield'>
+        <label for="speciesgroup">speciesgroup</label>
+    	  <select data-values_url="/rvc_species/speciesgroup/" id="speciesgroup" name="speciesgroup"><option value="1">TestSpecGroup</option></select><a class='addlink' href='/rvc_species/speciesgroup/new'>Add speciesgroup</a> 
+      </div>
+    	<div class='formfield'>
+        <label for="participants">participants</label>
+    	  <select data-values_url="/rvc_species/observer/" id="participants" multiple name="participants"><option value="2">annelies</option><option value="1">dolf</option></select><a class='addlink' href='/rvc_species/observer/new'>Add observer</a> 
+      </div>
+    	<div class='formfield'>
+        <label for="date">date</label>
+    	  <input id="date" name="date" type="text" value=""> format: YYYY-MM-DD 
+      </div>
+    	<div class='formfield'>
+        <label for="time">time</label>
+    	  <input id="time" name="time" type="text" value=""> format: HH:MM 
+      </div>
+    	<div class='formfield' style="display: none;">
+        <label for="redirect">redirect</label>
+    	  <input id="redirect" name="redirect" type="hidden" value="list">
+     
+      </div>
+    	<div class='formfield' style="display: none;">
+        <label for="id">id</label>
+    	  <input id="id" name="id" type="hidden" value="">
+     
+      </div>
+</fieldset>
 </form>
 <button name="save" onclick="alert('test');jQuery('form[name=form_sample]').submit()">Save</button>
 <button name="save_new" onclick="jQuery('input[name=redirect]').val('form');jQuery('form[name=form_sample]').submit();">Save and New</button>

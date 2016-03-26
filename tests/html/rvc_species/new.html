@@ -47,7 +47,6 @@ ObservationList.prototype.render = function(){
   this.refresh();
 }
 
-
 var ObservationForm = function(){
   this.url='/rvc_species/observation/new';
   formContainer.call(this, id='observationForm', classes=[]);
@@ -56,11 +55,20 @@ ObservationForm.prototype = Object.create(formContainer.prototype);
 ObservationForm.prototype.constructor = ObservationForm;
 ObservationForm.prototype.setSaveButtons = function(){
   this.container.find('button[name="save"]').remove();
-  this.container.find('button[name=save_new]').removeAttr('onclick');
-  form=this.container.find('form')
-  this.container.find('button[name="save_new"]').click({form:form},function(e){
-    e.data.form.find('input[name=redirect]').val('form');
-    e.data.form.submit();
+  this.container.find('button[name=save_new]').remove();
+  button = jQuery("<button name='save'>Save</button>")
+  this.container.append(button);
+  button.click({container:this.container},function(e){
+    console.log(e.data.container);
+    dialog=openWaitDialog('Saving.');
+    jQuery(document).ajaxStop(function(){ closeWaitDialog(dialog);});
+    e.data.container.find('form').each(function(index){
+      form = jQuery(this);
+      console.log('submitting form');
+      console.log(form);
+      form.find('input[name=redirect]').val('form');
+      form.submit();
+    });
   });
 }
 ObservationForm.prototype.render = function(){
@@ -90,27 +98,29 @@ ObservationForm.prototype.getAjaxForm = function(){
 }
 
 ObservationForm.prototype.setAjaxForm = function(){
-  this.container.find('form').submit(function(e){
-    e.preventDefault();
-    dialog=openWaitDialog('Saving observation.');
-    jQuery.ajax({
-      method:"POST",
-      url: jQuery(this).attr('action'),
-      data: jQuery(this).serialize(),
-      success:function(data,textStatus){
-        closeWaitDialog(dialog);
-        obsForm.container.html(data)
-        obsForm.setAjaxForm();
-        setModalLinks(obsForm);
-        obsForm.setSaveButtons();
-        obsForm.container.find('ul.messages').html("<li class='message'>Observation saved.</li>");
-        obsList.refresh();
-      },
-      error:function(data,textStatus){
-        console.log('error');
-      }
-    });
+  this.container.find('form').each(function(i){
+    form = jQuery(this);
+    form.submit(function(e){
+  	  e.preventDefault();
+      jQuery.ajax({
+        method:"POST",
+        url: jQuery(this).attr('action'),
+        data: jQuery(this).serialize(),
+        success:function(data,textStatus){
+          console.log('succesfully submitted');
+          obsForm.container.html(data)
+          obsForm.setAjaxForm();
+          setModalLinks(obsForm);
+          obsForm.setSaveButtons();
+          obsForm.container.find('ul.messages').html("<li class='message'>Observation saved.</li>");
+          obsList.refresh();
+        },
+        error:function(data,textStatus){
+          console.log('error');
+        }
+      });
     return false;
+    })
   });
 }
 

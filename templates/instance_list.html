@@ -14,6 +14,9 @@
 	  {% endif %}
   </ul>
 	{% endwith %}
+  <ul class="menu">
+    <li><a href="{{ url_for('/.newsample', datasetname=request.view_args['datasetname']) }}">Add sample</a></li>
+  </ul>
   <div class="headerrow">
     {% for k in fields %}
       <span class='headerfield {{ k }}'>{{ k }}</span>
@@ -26,7 +29,7 @@
             {% for k in fields %}
                 <span class="datafield {{ k }}">{{ inst[k] or '' }}</span>
             {% endfor %}
-            <span class="datafield editlink"><a class="editlink" href='{{ url_for("/.edit",id=inst["id"],**request.view_args) }}'>edit</a></span>
+            <span class="datafield editlink"><a class="editlink" href='{{ url_for("/.editsample",id=inst["id"], datasetname=request.view_args["datasetname"]) }}'>edit</a></span>
             <span class="datafield deletelink"><a class="deletelink" href='{{ url_for("/.delete",id=inst["id"],**request.view_args) }}'>delete</a></span>
         </div>
     {% endfor %}
